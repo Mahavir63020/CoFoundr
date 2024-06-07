@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesTug Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.css">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #ffffff; /* White background */
+    font-family: Arial, sans-serif;
+}
+.box {
+    position: relative;
+    width: 1450px;
+    height: 650px;
+    border-radius: 20px; /* Rounded corners */
+}
+.box::before {
+    content: '';
+    position: absolute;
+    top: -2.5px;
+    left: -2.5px;
+    right: -2.5px;
+    bottom: -2.5px;
+    background: linear-gradient(90deg, #a445b2, #fa4299);
+    border-radius: 10px; /* Rounded corners */
+    z-index: -1;
+}
+.box span {
+    position: absolute;
+    inset: 4px;
+    background: #222;
+    border-radius: 10px;
+    z-index: 1;
+}
+/* Sidebar Styling */
+.sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background: #87ceeb; /* Sky blue */
+    color: #000000; /* Black text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    z-index: 2;
+    overflow-y: auto;
+}
+.sidebar img {
+    width: 65px;
+    height: 65px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+}
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+.sidebar ul {
+    list-style-type: none;
+    width: 100%;
+}
+.sidebar ul li {
+    width: 100%;
+    margin-bottom: 10px;
+}
+.sidebar ul li .dashboard-box {
+    width: 100%;
+    padding: 15px;
+    background-color: #ffa500; /* Light orange */
+    color: #ffffff; /* White text */
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 1rem;
+}
+.sidebar ul li .dashboard-box:hover {
+    background-color: #ffffff; /* White hover */
+    color: #000000; /* Black text on hover */
+}
+/* Top Navigation Bar Styling */
+.top-nav {
+    position: absolute;
+    top: 0;
+    left: 250px;
+    width: calc(100% - 250px);
+    height: 60px;
+    background: #ffa500; /* Light orange */
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    color: #ffffff; /* White text */
+    border-top-right-radius: 10px;
+    z-index: 2;
+}
+.top-nav .logo-container {
+    display: flex;
+    align-items: center;
+}
+.top-nav .logo-container img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.top-nav h2 {
+    margin-left: 20px;
+}
+/* Main Content Area Styling */
+.main-content {
+    position: absolute;
+    top: 60px;
+    left: 250px;
+    width: calc(100% - 250px);
+    height: calc(100% - 60px);
+    background: #ffffff; /* White background */
+    padding: 20px;
+    overflow-y: auto;
+    border-bottom-right-radius: 10px;
+}
+/* Content Sections Styling */
+.content-section {
+    display: none;
+}
+.content-section.active {
+    display: block;
+}
+.canvas-container {
+    width: 40%; /* Decreased width by 20% */
+    height: 40%; /* Decreased height by 20% */
+    margin: 0 auto; /* Center the canvas */
+}
+/* Video Container */
+.video-container {
+    text-align: center;
+    padding: 20px;
+}
+.video-container video {
+    width: 80%;
+    height: auto;
+    border: 2px solid #000000; /* Black border */
+    border-radius: 10px;
+}
+/* Note Styling */
+.note {
+    position: absolute;
+    bottom: 1px;
+    width: 100%;
+    text-align: bottom;
+    font-size: 0.8rem;
+    color: grey;
+    padding: 10px;
+}
+</style>
+</head>
+<body>
+<div class="box">
+    <span>
+        <div class="sidebar">
+            <img src="logo.jpeg" alt="SalesTug Logo">
+            <h2>SalesTug Voice AI</h2>
+            <ul>
+                <li><div class="dashboard-box" onclick="showContent('demo-video')">Demo Video</div></li>
+                <li><div class="dashboard-box" onclick="showContent('daily-call-summary')">Daily Call Summary</div></li>
+                <li><div class="dashboard-box" onclick="showContent('call-recordings')">Call Recordings</div></li>
+                <li><div class="dashboard-box" onclick="showContent('call-outcomes')">Call Outcomes</div></li>
+                <li><div class="dashboard-box" onclick="showContent('lead-status')">Lead Status</div></li>
+                <li><div class="dashboard-box" onclick="showContent('response-rate')">Response Rate</div></li>
+                <li><div class="dashboard-box" onclick="showContent('appointments-scheduled')">Appointments Scheduled</div></li>
+                <li><div class="dashboard-box" onclick="showContent('performance-metrics')">Performance Metrics</div></li>
+            </ul>
+        </div>
+        <div class="top-nav">
+            <h2>Dashboard</h2>
+        </div>
+        <div class="main-content">
+            <div id="demo-video" class="content-section active">
+                <h2>Demo Video</h2>
+                <div class="video-container">
+                    <video controls>
+                        <source src="demo.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+            <div id="daily-call-summary" class="content-section">
+                <h2>Daily Call Summary</h2>
+                <p>Total calls made: 150</p>
+                <p>Successful connections: 120</p>
+                <p>Voicemail left: 30</p>
+                <div class="canvas-container">
+                    <canvas id="dailyCallSummaryChart"></canvas>
+                </div>
+            </div>
+            <div id="call-recordings" class="content-section">
+                <h2>Call Recordings</h2>
+                <p>Access to call recordings</p>
+                <p>Transcripts of conversations for review</p>
+                <div class="canvas-container">
+                    <canvas id="callRecordingsChart"></canvas>
+                </div>
+            </div>
+            <div id="call-outcomes" class="content-section">
+                <h2>Call Outcomes</h2>
+                <p>Uninterested leads: 10</p>
+                <p>Wrong numbers/disconnected calls: 5</p>
+                <p>Follow-up calls needed: 15</p>
+                <div class="canvas-container">
+                    <canvas id="callOutcomesChart"></canvas>
+                </div>
+            </div>
+            <div id="lead-status" class="content-section">
+                <h2>Lead Status</h2>
+                <p>Total leads contacted: 100</p>
+                <p>Leads converted into appointments: 30</p>
+                <p>Leads requiring immediate attention: 20</p>
+                <div class="canvas-container">
+                    <canvas id="leadStatusChart"></canvas>
+                </div>
+            </div>
+            <div id="response-rate" class="content-section">
+                <h2>Response Rate</h2>
+                <p>Percentage of calls answered: 80%</p>
+                <p>Percentage of calls resulting in a conversation: 75%</p>
+                <p>Percentage of calls leading to a positive outcome: 60%</p>
+                <div class="canvas-container">
+                    <canvas id="responseRateChart"></canvas>
+                </div>
+            </div>
+            <div id="appointments-scheduled" class="content-section">
+                <h2>Appointments Scheduled</h2>
+                <p>Number of appointments scheduled: 20</p>
+                <p>Details of scheduled appointments: Date, Time, Lead Info</p>
+                <p>Number of appointments made by AI when live agent is not available: 5</p>
+                <div class="canvas-container">
+                    <canvas id="appointmentSchedulingChart"></canvas>
+                </div>
+            </div>
+            <div id="performance-metrics" class="content-section">
+                <h2>Performance Metrics (per day)</h2>
+                <p>Details about performance metrics go here.</p>
+                <div class="canvas-container">
+                    <canvas id="performanceMetricsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+    </span>
+    <div class="note">
+        Note: This dashboard is an example, and we can create one like this for you.
+    </div>
+</div>
+<!-- Include Chart.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script>
+    function showContent(sectionId) {
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    var dailyCallSummaryCtx = document.getElementById('dailyCallSummaryChart').getContext('2d');
+    var dailyCallSummaryChart = new Chart(dailyCallSummaryCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Calls Made', 'Successful Connections', 'Voicemail Left'],
+            datasets: [{
+                label: 'Count',
+                data: [150, 120, 30],
+                backgroundColor: ['#4682B4', '#FFA07A', '#808080'] // Steel blue, Light salmon, Gray
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var callOutcomesCtx = document.getElementById('callOutcomesChart').getContext('2d');
+    var callOutcomesChart = new Chart(callOutcomesCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Uninterested Leads', 'Wrong Numbers/Disconnected Calls', 'Follow-up Calls Needed'],
+            datasets: [{
+                label: 'Count',
+                data: [10, 5, 15],
+                backgroundColor: ['#4682B4', '#FFA07A', '#808080'] // Steel blue, Light salmon, Gray
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var leadStatusCtx = document.getElementById('leadStatusChart').getContext('2d');
+    var leadStatusChart = new Chart(leadStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Converted to Appointments', 'Requiring Immediate Attention', 'Yet to Be Contacted'],
+            datasets: [{
+                label: 'Leads Status',
+                data: [30, 20, 50],
+                backgroundColor: ['#4682B4', '#FFA07A', '#808080'] // Steel blue, Light salmon, Gray
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var responseRateCtx = document.getElementById('responseRateChart').getContext('2d');
+    var responseRateChart = new Chart(responseRateCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Answered Calls', 'Resulted in Conversation', 'Led to Positive Outcome'],
+            datasets: [{
+                label: 'Response Rate',
+                data: [80, 75, 60],
+                backgroundColor: ['#4682B4', '#FFA07A', '#808080'] // Steel blue, Light salmon, Gray
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var appointmentSchedulingCtx = document.getElementById('appointmentSchedulingChart').getContext('2d');
+    var appointmentSchedulingChart = new Chart(appointmentSchedulingCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Scheduled by Live Agents', 'Scheduled by AI'],
+            datasets: [{
+                label: 'Appointments',
+                data: [15, 5],
+                backgroundColor: ['#4682B4', '#FFA07A'] // Steel blue, Light salmon
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var performanceMetricsCtx = document.getElementById('performanceMetricsChart').getContext('2d');
+    var performanceMetricsChart = new Chart(performanceMetricsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+            datasets: [{
+                label: 'Performance Metrics',
+                data: [80, 90, 70, 85, 75, 95, 85],
+                borderColor: '#4682B4', // Steel blue
+                backgroundColor: 'rgba(70, 130, 180, 0.2)', // Steel blue with transparency
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+</script>
+</body>
+</html>
