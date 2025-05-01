@@ -32,6 +32,17 @@
     <button onclick="showView('chat')">Chat</button>
   </nav>
 
+  <h2>Create a Project</h2>
+<input id="project-title" placeholder="Project Title"><br>
+<textarea id="project-desc" placeholder="Project Description"></textarea><br>
+<input id="project-roles" placeholder="Roles (comma-separated: e.g. Designer,Frontend)"><br>
+<button onclick="createProject()">Create Project</button>
+
+<hr>
+
+<h2>All Projects</h2>
+<div id="project-list"></div>
+
   <div id="home" class="view">
     <h1>Featured Projects</h1>
     <div id="project-list"></div>
@@ -144,6 +155,90 @@
         document.getElementById("main-app").style.display = "none";
       }
     });
+
+    import {
+  collection,
+  addDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  doc,
+  updateDoc,
+  arrayRemove,
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+window.createProject = async function () {
+  const title = document.getElementById("project-title").value;
+  const desc = document.getElementById("project-desc").value;
+  const roles = document.getElementById("project-roles").value.split(",").map(r => r.trim());
+
+  try {
+    await addDoc(collection(db, "projects"), {
+      title,
+      desc,
+      roles,
+      createdBy: auth.currentUser.uid,
+      createdByEmail: auth.currentUser.email,
+      applicants: []
+    });
+    alert("Project created!");
+  } catch (err) {
+    alert("Error creating project: " + err.message);
+  }
+};
+
+// Show all projects live
+const projectListDiv = document.getElementById("project-list");
+onSnapshot(collection(db, "projects"), (snapshot) => {
+  projectListDiv.innerHTML = "";
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const projectDiv = document.createElement("div");
+    projectDiv.innerHTML = `
+      <h3>${data.title}</h3>
+      <p>${data.desc}</p>
+      <p><strong>Roles:</strong> ${data.roles.join(", ")}</p>
+      <p><strong>By:</strong> ${data.createdByEmail}</p>
+      <button onclick="applyProject('${docSnap.id}')">Apply</button>
+      ${data.createdBy === auth.currentUser?.uid
+        ? `<button onclick="removeRole('${docSnap.id}')">Edit Roles</button>`
+        : ''}
+      <hr>
+    `;
+    projectListDiv.appendChild(projectDiv);
+  });
+});
+
+// Apply to project
+window.applyProject = async function (id) {
+  const user = auth.currentUser;
+  const projRef = doc(db, "projects", id);
+  const snapshot = await getDocs(query(collection(db, "projects")));
+  snapshot.forEach(async (docSnap) => {
+    if (docSnap.id === id) {
+      const data = docSnap.data();
+      if (data.applicants.includes(user.uid)) {
+        alert("Already applied!");
+      } else {
+        await updateDoc(projRef, {
+          applicants: [...data.applicants, user.uid]
+        });
+        alert("Applied!");
+      }
+    }
+  });
+};
+
+// Edit roles (basic)
+window.removeRole = async function (id) {
+  const newRoles = prompt("Enter new roles (comma-separated)");
+  if (!newRoles) return;
+  await updateDoc(doc(db, "projects", id), {
+    roles: newRoles.split(",").map(r => r.trim())
+  });
+  alert("Roles updated!");
+};
+
   </script>
   
 </body>
