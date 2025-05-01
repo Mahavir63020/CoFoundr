@@ -70,10 +70,6 @@
     <button onclick="sendMessage()">Send</button>
   </div>
 
-<h2>Your Notifications</h2>
-<div id="notif-box"></div>
-
-
   <script src="js/main.js"></script>
   <script src="js/project.js"></script>
   <script src="js/apply.js"></script>
@@ -214,33 +210,23 @@ onSnapshot(collection(db, "projects"), (snapshot) => {
 });
 
 // Apply to project
-import { setDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
 window.applyProject = async function (id) {
   const user = auth.currentUser;
   const projRef = doc(db, "projects", id);
-  const projSnap = await getDoc(projRef);
-  const proj = projSnap.data();
-
-  if (proj.applicants.includes(user.uid)) {
-    alert("You already applied.");
-    return;
-  }
-
-  await updateDoc(projRef, {
-    applicants: [...proj.applicants, user.uid]
+  const snapshot = await getDocs(query(collection(db, "projects")));
+  snapshot.forEach(async (docSnap) => {
+    if (docSnap.id === id) {
+      const data = docSnap.data();
+      if (data.applicants.includes(user.uid)) {
+        alert("Already applied!");
+      } else {
+        await updateDoc(projRef, {
+          applicants: [...data.applicants, user.uid]
+        });
+        alert("Applied!");
+      }
+    }
   });
-
-  const notifRef = doc(collection(db, "notifications"));
-  await setDoc(notifRef, {
-    to: proj.createdBy,
-    from: user.uid,
-    type: "applied",
-    projectId: id,
-    timestamp: Date.now()
-  });
-
-  alert("Applied! Notification sent.");
 };
 
 // Edit roles (basic)
@@ -252,32 +238,6 @@ window.removeRole = async function (id) {
   });
   alert("Roles updated!");
 };
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const notifBox = document.getElementById("notif-box");
-
-    const notifQuery = query(
-      collection(db, "notifications"),
-      where("to", "==", user.uid)
-    );
-
-    onSnapshot(notifQuery, (snapshot) => {
-      notifBox.innerHTML = "";
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const msg = data.type === "applied"
-          ? `Someone applied to your project!`
-          : `Your application was ${data.type}.`;
-
-        const div = document.createElement("div");
-        div.textContent = msg;
-        notifBox.appendChild(div);
-      });
-    });
-  }
-});
-
 
   </script>
   
