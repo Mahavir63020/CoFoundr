@@ -63,6 +63,9 @@
     <div id="my-projects-list"></div>
   </div>
 
+<h2>Notifications</h2>
+<div id="notif-list"></div>
+
   <div id="chat" class="view" style="display: none;">
     <h1>Chat</h1>
     <div id="chat-box">No messages yet</div>
@@ -229,6 +232,15 @@ window.applyProject = async function (id) {
   });
 };
 
+// Send notification to project creator
+await addDoc(collection(db, "notifications"), {
+  to: data.createdBy,
+  message: `${auth.currentUser.email} applied to your project "${data.title}".`,
+  timestamp: Date.now(),
+  read: false
+});
+
+
 // Edit roles (basic)
 window.removeRole = async function (id) {
   const newRoles = prompt("Enter new roles (comma-separated)");
@@ -238,6 +250,27 @@ window.removeRole = async function (id) {
   });
   alert("Roles updated!");
 };
+
+const notifList = document.getElementById("notif-list");
+onSnapshot(
+  query(collection(db, "notifications")),
+  (snapshot) => {
+    notifList.innerHTML = "";
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      if (data.to === auth.currentUser?.uid) {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <p>${data.message}</p>
+          <small>${new Date(data.timestamp).toLocaleString()}</small>
+          <hr>
+        `;
+        notifList.appendChild(div);
+      }
+    });
+  }
+);
+
 
   </script>
   
