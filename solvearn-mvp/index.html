@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Solvearn MVP</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="auth-section">
+        <h2>Sign Up</h2>
+        <input type="email" id="signup-email" placeholder="Email"><br>
+        <input type="password" id="signup-password" placeholder="Password"><br>
+        <button onclick="signup()">Sign Up</button>
+      
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email"><br>
+        <input type="password" id="login-password" placeholder="Password"><br>
+        <button onclick="login()">Log In</button>
+      
+        <hr>
+        <button onclick="googleLogin()">Sign In with Google</button>
+      </div>
+      
+      <div id="main-app" style="display:none;">
+        <button onclick="logout()">Log Out</button>
+        <!-- Your main app content goes here -->
+      </div>
+      
+  <nav>
+    <button onclick="showView('home')">Home</button>
+    <button onclick="showView('create')">Create Project</button>
+    <button onclick="showView('myProjects')">My Projects</button>
+    <button onclick="showView('chat')">Chat</button>
+  </nav>
+
+  <div id="home" class="view">
+    <h1>Featured Projects</h1>
+    <div id="project-list"></div>
+  </div>
+
+  <div id="create" class="view" style="display: none;">
+    <h1>Create a Project</h1>
+    <form id="create-form">
+      <input type="text" id="project-name" placeholder="Project Name" required><br>
+      <textarea id="project-desc" placeholder="Description" required></textarea><br>
+      <input type="text" id="project-roles" placeholder="Roles (comma separated)" required><br>
+      <button type="submit">Create</button>
+    </form>
+  </div>
+
+  <div id="myProjects" class="view" style="display: none;">
+    <h1>My Projects</h1>
+    <div id="my-projects-list"></div>
+  </div>
+
+  <div id="chat" class="view" style="display: none;">
+    <h1>Chat</h1>
+    <div id="chat-box">No messages yet</div>
+    <input id="chat-input" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/project.js"></script>
+  <script src="js/apply.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
+      authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
+      projectId: "solvearn-mvp-a00f1",
+      storageBucket: "solvearn-mvp-a00f1.firebasestorage.app",
+      messagingSenderId: "71657733409",
+      appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
+      measurementId: "G-NJGT0SJ2TP"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+    // Signup with email/password
+    window.signup = async function () {
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("Signup successful!");
+      } catch (error) {
+        alert("Signup error: " + error.message);
+      }
+    };
+  
+    // Login with email/password
+    window.login = async function () {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful!");
+      } catch (error) {
+        alert("Login error: " + error.message);
+      }
+    };
+  
+    // Login with Google
+    window.googleLogin = async function () {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        alert("Google login successful!");
+      } catch (error) {
+        alert("Google login error: " + error.message);
+      }
+    };
+  
+    // Logout
+    window.logout = function () {
+      signOut(auth);
+    };
+  
+    // Show/hide views
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Logged in:", user.email);
+        document.getElementById("auth-section").style.display = "none";
+        document.getElementById("main-app").style.display = "block";
+      } else {
+        document.getElementById("auth-section").style.display = "block";
+        document.getElementById("main-app").style.display = "none";
+      }
+    });
+  </script>
+  
+</body>
+</html>
