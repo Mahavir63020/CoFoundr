@@ -3,231 +3,797 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solvearn - Find Project Collaborators</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <title>Solvearn - Find Project Partners</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
-    .gradient-bg {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary: #10b981;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+      --danger: #ef4444;
     }
-    .card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
-    .card:hover {
+    
+    body {
+      background-color: #f1f5f9;
+      color: var(--dark);
+      line-height: 1.5;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    /* Header styles */
+    header {
+      background-color: #0f172a;
+      color: white;
+      padding: 1rem 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo i {
+      margin-right: 0.5rem;
+      color: var(--secondary);
+    }
+    
+    /* Auth section */
+    .auth-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 400px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .auth-tabs {
+      display: flex;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+    
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      cursor: pointer;
+      border-bottom: 2px solid var(--gray-light);
+      font-weight: 500;
+    }
+    
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+    
+    .auth-form {
+      width: 100%;
+    }
+    
+    .auth-form:not(.active) {
+      display: none;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid var(--gray-light);
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      background-color: var(--primary);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--gray);
+      color: var(--dark);
+    }
+    
+    .btn-outline:hover {
+      background-color: var(--gray-light);
+    }
+    
+    .social-auth {
+      margin-top: 2rem;
+      width: 100%;
+    }
+    
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      width: 100%;
+      background-color: white;
+      border: 1px solid var(--gray-light);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .social-btn i {
+      font-size: 1.25rem;
+    }
+    
+    .social-btn.google i {
+      color: #DB4437;
+    }
+    
+    .social-btn:hover {
+      background-color: var(--gray-light);
+    }
+    
+    /* Main app styles */
+    .main-app {
+      padding: 2rem 0;
+    }
+    
+    .navbar {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    
+    .nav-link {
+      color: var(--dark);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 0;
+      position: relative;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary);
+    }
+    
+    .nav-link.active {
+      color: var(--primary);
+    }
+    
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+    }
+    
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 18px;
+      height: 18px;
+      background-color: var(--danger);
+      color: white;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .notification-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 20;
+    }
+    
+    .notification-dropdown.show {
+      display: block;
+    }
+    
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .notification-list {
+      list-style: none;
+    }
+    
+    .notification-item {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-light);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .notification-item:hover {
+      background-color: #f1f5f9;
+    }
+    
+    .notification-item.unread {
+      background-color: #ebf5ff;
+    }
+    
+    .notification-item.unread:hover {
+      background-color: #dbeafe;
+    }
+    
+    .notification-content {
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .notification-time {
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+    
+    .notification-empty {
+      padding: 2rem;
+      text-align: center;
+      color: var(--gray);
+    }
+    
+    /* Filter bar */
+    .filter-bar {
+      background-color: #0f172a;
+      color: white;
+      padding: 1rem 0;
+    }
+    
+    .filter-container {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .filter-label {
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    
+    .filter-btn {
+      background-color: #334155;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .filter-btn:hover {
+      background-color: #475569;
+    }
+    
+    .filter-btn.active {
+      background-color: var(--primary);
+    }
+    
+    .filter-dropdown {
+      position: relative;
+    }
+    
+    .filter-dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 150px;
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 20;
+    }
+    
+    .filter-dropdown-item {
+      padding: 0.75rem 1rem;
+      color: var(--dark);
+      cursor: pointer;
+    }
+    
+    .filter-dropdown-item:hover {
+      background-color: var(--gray-light);
+    }
+    
+    .filter-result {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: #94a3b8;
+    }
+    
+    .search-container {
+      position: relative;
+      flex-grow: 1;
+      max-width: 400px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      color: white;
+    }
+    
+    .search-input::placeholder {
+      color: #94a3b8;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+    
+    .search-clear {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    
+    /* Project cards */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .project-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .project-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 15px rgba(0,0,0,0.1);
     }
-    .btn-gradient {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: all 0.3s ease;
+    
+    .project-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--gray-light);
     }
-    .btn-gradient:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
+    
+    .project-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .project-creator {
+      font-size: 0.875rem;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .project-body {
+      padding: 1.5rem;
+    }
+    
+    .project-description {
+      margin-bottom: 1.5rem;
+    }
+    
+    .project-roles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .role-tag {
+      background-color: #dbeafe;
+      color: #1e40af;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .project-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .project-meta {
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+    
+    /* Create project form */
+    .form-section {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-row {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+    
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .filter-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .search-container {
+        max-width: 100%;
+      }
+      
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .notification-dropdown {
+        width: 100%;
+        max-width: 350px;
+        right: -100%;
+      }
     }
   </style>
 </head>
-<body class="bg-gray-50 font-sans">
-  <!-- Auth Section -->
-  <div id="auth-section" class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-8">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-indigo-600">Solvearn</h1>
-        <p class="text-gray-600 mt-2">Connect, Collaborate, Create</p>
-      </div>
-
-      <div class="mb-8">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Sign Up</h2>
-        <div class="space-y-4">
-          <input type="email" id="signup-email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <input type="password" id="signup-password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button onclick="signup()" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Create Account</button>
+<body>
+  <header>
+    <div class="container header-container">
+      <a href="#" class="logo">
+        <i class="fas fa-code-branch"></i>
+        Solvearn
+      </a>
+      <div id="user-menu" style="display: none;">
+        <div class="user-actions">
+          <div class="notification-bell" id="notification-toggle">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">0</span>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notification-header">
+                <h3>Notifications</h3>
+                <button class="btn-link" id="mark-all-read">Mark all as read</button>
+              </div>
+              <ul class="notification-list" id="notification-list">
+                <li class="notification-empty">No notifications yet</li>
+              </ul>
+            </div>
+          </div>
+          <button class="btn btn-outline" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Log out</span>
+          </button>
         </div>
       </div>
-
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Login</h2>
-        <div class="space-y-4">
-          <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button onclick="login()" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Log In</button>
-        </div>
-      </div>
-
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500">Or continue with</span>
-        </div>
-      </div>
-
-      <button onclick="googleLogin()" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-        <img src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google" class="w-5 h-5 mr-2">
-        <span>Sign in with Google</span>
-      </button>
     </div>
+  </header>
+
+  <!-- Auth Section -->
+  <div id="auth-section" class="auth-container">
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-tab="login">Login</div>
+      <div class="auth-tab" data-tab="signup">Sign Up</div>
+    </div>
+    
+    <form class="auth-form active" id="login-form">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" class="form-control" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn btn-block" id="login-btn">Log In</button>
+      
+      <div class="social-auth">
+        <button type="button" class="social-btn google" id="google-login-btn">
+          <i class="fab fa-google"></i>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+    </form>
+    
+    <form class="auth-form" id="signup-form">
+      <div class="form-group">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" class="form-control" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" class="form-control" placeholder="Create a password" required>
+      </div>
+      <button type="submit" class="btn btn-block" id="signup-btn">Sign Up</button>
+      
+      <div class="social-auth">
+        <button type="button" class="social-btn google" id="google-signup-btn">
+          <i class="fab fa-google"></i>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+    </form>
   </div>
 
-  <!-- Main Application -->
-  <div id="main-app" class="min-h-screen flex flex-col" style="display:none;">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-10">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-indigo-600">Solvearn</h1>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
-              <button onclick="showView('home')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Home</button>
-              <button onclick="showView('create')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Create Project</button>
-              <button onclick="showView('myProjects')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">My Projects</button>
-              <button onclick="showView('chat')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Chat</button>
-            </div>
+  <!-- Main App -->
+  <div id="main-app" style="display: none;">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="container">
+        <div class="filter-container">
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="search-projects" placeholder="Search for a specific project...">
+            <i class="fas fa-times search-clear" id="search-clear"></i>
           </div>
-          <div class="flex items-center">
-            <button id="notifications-btn" class="p-2 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-gray-100 relative">
-              <i class="fas fa-bell"></i>
-              <span id="notif-badge" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">0</span>
+          
+          <button class="filter-btn active" id="my-projects-btn">
+            MY PROJECTS
+          </button>
+          
+          <div class="filter-dropdown">
+            <button class="filter-btn" id="category-filter">
+              CATEGORY
+              <i class="fas fa-chevron-down"></i>
             </button>
-            <div class="ml-3 relative">
-              <div>
-                <button id="user-menu-btn" class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="false" aria-haspopup="true">
-                  <span class="sr-only">Open user menu</span>
-                  <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                    <span id="user-initials">U</span>
-                  </div>
-                </button>
-              </div>
-              <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-                <div id="user-email" class="block px-4 py-2 text-sm text-gray-700 border-b"></div>
-                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
-              </div>
-            </div>
-            <div class="ml-3 sm:hidden">
-              <button id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
-                <i class="fas fa-bars"></i>
-              </button>
+            <div class="filter-dropdown-content">
+              <div class="filter-dropdown-item">Web Development</div>
+              <div class="filter-dropdown-item">Mobile App</div>
+              <div class="filter-dropdown-item">UI/UX Design</div>
+              <div class="filter-dropdown-item">Data Science</div>
+              <div class="filter-dropdown-item">Machine Learning</div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <!-- Mobile menu, show/hide based on menu state -->
-      <div id="mobile-menu" class="sm:hidden hidden">
-        <div class="px-2 pt-2 pb-3 space-y-1">
-          <button onclick="showView('home')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Home</button>
-          <button onclick="showView('create')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Create Project</button>
-          <button onclick="showView('myProjects')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">My Projects</button>
-          <button onclick="showView('chat')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Chat</button>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Notifications Panel -->
-    <div id="notifications-panel" class="hidden fixed inset-0 overflow-hidden z-20" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
-          <div class="relative w-screen max-w-md">
-            <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
-              <div class="p-6">
-                <div class="flex items-start justify-between">
-                  <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Notifications</h2>
-                  <div class="ml-3 h-7 flex items-center">
-                    <button id="close-notifications" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none">
-                      <span class="sr-only">Close panel</span>
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="flex-1 px-4 sm:px-6">
-                <div id="notif-list" class="divide-y divide-gray-200">
-                  <!-- Notifications will be inserted here -->
-                </div>
-              </div>
+          
+          <div class="filter-dropdown">
+            <button class="filter-btn" id="location-filter">
+              LOCATION
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="filter-dropdown-content">
+              <div class="filter-dropdown-item">Remote</div>
+              <div class="filter-dropdown-item">On-site</div>
+              <div class="filter-dropdown-item">Hybrid</div>
             </div>
           </div>
+          
+          <div class="filter-dropdown">
+            <button class="filter-btn" id="team-size-filter">
+              TEAM SIZE
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="filter-dropdown-content">
+              <div class="filter-dropdown-item">1-5</div>
+              <div class="filter-dropdown-item">6-10</div>
+              <div class="filter-dropdown-item">11-20</div>
+              <div class="filter-dropdown-item">20+</div>
+            </div>
+          </div>
+          
+          <div class="filter-dropdown">
+            <button class="filter-btn" id="stage-filter">
+              STAGE
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="filter-dropdown-content">
+              <div class="filter-dropdown-item">Idea</div>
+              <div class="filter-dropdown-item">MVP</div>
+              <div class="filter-dropdown-item">Beta</div>
+              <div class="filter-dropdown-item">Launched</div>
+            </div>
+          </div>
+          
+          <div class="sort-dropdown">
+            <button class="filter-btn" id="sort-filter">
+              <i class="fas fa-sort"></i>
+              Sort by
+            </button>
+          </div>
+        </div>
+        <div class="filter-result">
+          Projects matching filters: <span id="project-count">0</span>
         </div>
       </div>
     </div>
-
-    <!-- Main Content Views -->
-    <div class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-      
-      <!-- Home View -->
-      <div id="home" class="view">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Featured Projects</h1>
-          <p class="text-gray-600">Find exciting projects to collaborate on</p>
-        </div>
-        <div id="project-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Projects will be inserted here -->
+    
+    <div class="container main-app">
+      <div id="view-home" class="view-section">
+        <h2 class="section-title">Featured Projects</h2>
+        <div class="projects-grid" id="project-list">
+          <!-- Projects will be loaded here -->
         </div>
       </div>
       
-      <!-- Create Project View -->
-      <div id="create" class="view hidden">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Create a Project</h1>
-          <p class="text-gray-600">Share your idea and find talented collaborators</p>
-        </div>
-        <div class="bg-white shadow rounded-lg p-6">
-          <div class="space-y-6">
-            <div>
-              <label for="project-title" class="block text-sm font-medium text-gray-700">Project Title</label>
-              <input id="project-title" type="text" placeholder="E.g., Mobile App for Sustainable Shopping" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+      <div id="view-create" class="view-section" style="display: none;">
+        <div class="form-section">
+          <h2 class="form-title">Create a New Project</h2>
+          <form id="create-project-form">
+            <div class="form-row">
+              <label for="project-title">Project Title</label>
+              <input type="text" id="project-title" class="form-control" placeholder="Give your project a clear title" required>
             </div>
-            <div>
-              <label for="project-desc" class="block text-sm font-medium text-gray-700">Project Description</label>
-              <textarea id="project-desc" rows="4" placeholder="Describe your project, goals, and vision..." class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+            <div class="form-row">
+              <label for="project-desc">Description</label>
+              <textarea id="project-desc" class="form-control" placeholder="Describe your project in detail" required></textarea>
             </div>
-            <div>
-              <label for="project-roles" class="block text-sm font-medium text-gray-700">Roles Needed</label>
-              <input id="project-roles" type="text" placeholder="E.g., Designer, Frontend, Backend" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-              <p class="mt-2 text-sm text-gray-500">Separate roles with commas</p>
+            <div class="form-row">
+              <label for="project-category">Category</label>
+              <select id="project-category" class="form-control" required>
+                <option value="">Select a category</option>
+                <option value="web">Web Development</option>
+                <option value="mobile">Mobile App</option>
+                <option value="design">UI/UX Design</option>
+                <option value="data">Data Science</option>
+                <option value="ml">Machine Learning</option>
+              </select>
             </div>
-            <div>
-              <button onclick="createProject()" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-md text-white btn-gradient shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Create Project
-              </button>
+            <div class="form-row">
+              <label for="project-roles">Roles Needed (comma separated)</label>
+              <input type="text" id="project-roles" class="form-control" placeholder="e.g. Frontend Developer, UI Designer, Project Manager" required>
             </div>
-          </div>
+            <div class="form-row">
+              <label for="project-location">Location</label>
+              <select id="project-location" class="form-control" required>
+                <option value="">Select location preference</option>
+                <option value="remote">Remote</option>
+                <option value="onsite">On-site</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="cancel-create">Cancel</button>
+              <button type="submit" class="btn" id="submit-project">Create Project</button>
+            </div>
+          </form>
         </div>
       </div>
       
-      <!-- My Projects View -->
-      <div id="myProjects" class="view hidden">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">My Projects</h1>
-          <p class="text-gray-600">Manage your created projects and applications</p>
-        </div>
-        <div id="my-projects-list" class="space-y-6">
-          <!-- My projects will be inserted here -->
-        </div>
-      </div>
-      
-      <!-- Chat View -->
-      <div id="chat" class="view hidden">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Messages</h1>
-          <p class="text-gray-600">Communicate with your collaborators</p>
-        </div>
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-          <div id="chat-box" class="h-96 overflow-y-auto p-4 space-y-3">
-            <div class="flex justify-center">
-              <p class="text-gray-500 text-sm">No messages yet</p>
-            </div>
-          </div>
-          <div class="border-t p-4 flex">
-            <input id="chat-input" type="text" placeholder="Type a message..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <button onclick="sendMessage()" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
+      <div id="view-my-projects" class="view-section" style="display: none;">
+        <h2 class="section-title">My Projects</h2>
+        <div class="projects-grid" id="my-projects-list">
+          <!-- My projects will be loaded here -->
         </div>
       </div>
     </div>
@@ -244,7 +810,6 @@
       GoogleAuthProvider,
       signInWithPopup
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    
     import {
       getFirestore,
       collection,
@@ -254,10 +819,15 @@
       query,
       doc,
       updateDoc,
+      arrayUnion,
       arrayRemove,
-      where
+      orderBy,
+      serverTimestamp,
+      where,
+      Timestamp
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    
+
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
       authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
@@ -267,534 +837,501 @@
       appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
       measurementId: "G-NJGT0SJ2TP"
     };
-    
+
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
-    // UI elements and interactions
-    const userMenuBtn = document.getElementById('user-menu-btn');
-    const userDropdown = document.getElementById('user-dropdown');
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const notificationsBtn = document.getElementById('notifications-btn');
-    const notificationsPanel = document.getElementById('notifications-panel');
-    const closeNotifications = document.getElementById('close-notifications');
-    
-    userMenuBtn.addEventListener('click', () => {
-      userDropdown.classList.toggle('hidden');
-    });
-    
-    mobileMenuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
-    
-    notificationsBtn.addEventListener('click', () => {
-      notificationsPanel.classList.remove('hidden');
-    });
-    
-    closeNotifications.addEventListener('click', () => {
-      notificationsPanel.classList.add('hidden');
-    });
-    
-    // Hide dropdowns when clicking outside
-    document.addEventListener('click', (event) => {
-      if (!userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
-        userDropdown.classList.add('hidden');
-      }
-      
-      if (!notificationsBtn.contains(event.target) && !notificationsPanel.contains(event.target) || closeNotifications.contains(event.target)) {
-        notificationsPanel.classList.add('hidden');
-      }
-    });
-    
-    // View management
-    window.showView = function(viewName) {
-      document.querySelectorAll('.view').forEach(view => {
-        view.classList.add('hidden');
+
+    // DOM elements
+    const authSection = document.getElementById('auth-section');
+    const mainApp = document.getElementById('main-app');
+    const userMenu = document.getElementById('user-menu');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const authTabs = document.querySelectorAll('.auth-tab');
+    const logoutButton = document.getElementById('logout-btn');
+    const projectsList = document.getElementById('project-list');
+    const myProjectsList = document.getElementById('my-projects-list');
+    const createProjectForm = document.getElementById('create-project-form');
+    const notificationList = document.getElementById('notification-list');
+    const notificationCount = document.getElementById('notification-count');
+    const markAllReadButton = document.getElementById('mark-all-read');
+    const notificationToggle = document.getElementById('notification-toggle');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    const searchInput = document.getElementById('search-projects');
+    const searchClear = document.getElementById('search-clear');
+    const projectCount = document.getElementById('project-count');
+
+    // View sections
+    const viewHome = document.getElementById('view-home');
+    const viewCreate = document.getElementById('view-create');
+    const viewMyProjects = document.getElementById('view-my-projects');
+
+    // Auth tab switching
+    authTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        authTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+        document.getElementById(`${tab.dataset.tab}-form`).classList.add('active');
       });
-      document.getElementById(viewName).classList.remove('hidden');
-      
-      // Close mobile menu after navigation
-      mobileMenu.classList.add('hidden');
-    };
-    
-    // Auth functions
-    window.signup = async function() {
-      const email = document.getElementById("signup-email").value;
-      const password = document.getElementById("signup-password").value;
-      
-      if (!email || !password) {
-        showAlert("Please fill in all fields", "error");
-        return;
-      }
-      
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        showAlert("Account created successfully!", "success");
-      } catch (error) {
-        showAlert("Signup error: " + error.message, "error");
-      }
-    };
-    
-    window.login = async function() {
-      const email = document.getElementById("login-email").value;
-      const password = document.getElementById("login-password").value;
-      
-      if (!email || !password) {
-        showAlert("Please fill in all fields", "error");
-        return;
-      }
-      
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showAlert("Login successful", "success");
-      } catch (error) {
-        showAlert("Login error: " + error.message, "error");
-      }
-    };
-    
-    window.googleLogin = async function() {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-        showAlert("Google login successful", "success");
-      } catch (error) {
-        showAlert("Google login error: " + error.message, "error");
-      }
-    };
-    
-    window.logout = function() {
-      signOut(auth);
-      showAlert("Logged out successfully", "info");
-    };
-    
-    // Project functions
-    window.createProject = async function() {
-      const title = document.getElementById("project-title").value;
-      const desc = document.getElementById("project-desc").value;
-      const rolesInput = document.getElementById("project-roles").value;
-      
-      if (!title || !desc || !rolesInput) {
-        showAlert("Please fill in all fields", "error");
-        return;
-      }
-      
-      const roles = rolesInput.split(",").map(r => r.trim());
-      
-      try {
-        await addDoc(collection(db, "projects"), {
-          title,
-          desc,
-          roles,
-          createdBy: auth.currentUser.uid,
-          createdByEmail: auth.currentUser.email,
-          applicants: [],
-          createdAt: Date.now()
-        });
-        
-        showAlert("Project created successfully!", "success");
-        document.getElementById("project-title").value = "";
-        document.getElementById("project-desc").value = "";
-        document.getElementById("project-roles").value = "";
-        
-        // Navigate to home view to see the new project
-        showView('home');
-      } catch (error) {
-        showAlert("Error creating project: " + error.message, "error");
-      }
-    };
-    
-    // Apply to project
-    window.applyProject = async function(id) {
-      const user = auth.currentUser;
-      const projRef = doc(db, "projects", id);
-      
-      try {
-        const snapshot = await getDocs(query(collection(db, "projects")));
-        let projectData;
-        
-        snapshot.forEach((docSnap) => {
-          if (docSnap.id === id) {
-            projectData = docSnap.data();
-          }
-        });
-        
-        if (!projectData) {
-          showAlert("Project not found", "error");
-          return;
-        }
-        
-        if (projectData.applicants.includes(user.uid)) {
-          showAlert("You've already applied to this project", "info");
-          return;
-        }
-        
-        await updateDoc(projRef, {
-          applicants: [...projectData.applicants, user.uid]
-        });
-        
-        // Add notification to project creator
-        await addDoc(collection(db, "notifications"), {
-          to: projectData.createdBy,
-          from: user.uid,
-          fromEmail: user.email,
-          message: `${user.email} applied to your project "${projectData.title}"`,
-          timestamp: Date.now(),
-          read: false,
-          projectId: id
-        });
-        
-        showAlert("Application submitted successfully!", "success");
-      } catch (error) {
-        showAlert("Error applying to project: " + error.message, "error");
-      }
-    };
-    
-    // Edit roles
-    window.editRoles = async function(id) {
-      try {
-        const snapshot = await getDocs(query(collection(db, "projects")));
-        let projectData;
-        
-        snapshot.forEach((docSnap) => {
-          if (docSnap.id === id) {
-            projectData = docSnap.data();
-          }
-        });
-        
-        if (!projectData) {
-          showAlert("Project not found", "error");
-          return;
-        }
-        
-        const currentRoles = projectData.roles.join(", ");
-        const newRoles = prompt("Edit roles (comma-separated):", currentRoles);
-        
-        if (!newRoles) return;
-        
-        await updateDoc(doc(db, "projects", id), {
-          roles: newRoles.split(",").map(r => r.trim())
-        });
-        
-        showAlert("Roles updated successfully!", "success");
-      } catch (error) {
-        showAlert("Error updating roles: " + error.message, "error");
-      }
-    };
-    
-    // Chat function
-    window.sendMessage = function() {
-      const messageInput = document.getElementById("chat-input");
-      const message = messageInput.value.trim();
-      
-      if (!message) return;
-      
-      const chatBox = document.getElementById("chat-box");
-      const messageElement = document.createElement("div");
-      messageElement.className = "bg-indigo-50 p-3 rounded-lg max-w-xs ml-auto";
-      messageElement.innerHTML = `
-        <p class="text-gray-800">${message}</p>
-        <p class="text-xs text-gray-500 text-right mt-1">Just now</p>
-      `;
-      
-      // Clear previous "no messages" if it exists
-      if (chatBox.innerText.includes("No messages yet")) {
-        chatBox.innerHTML = "";
-      }
-      
-      chatBox.appendChild(messageElement);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      messageInput.value = "";
-      
-      // Simulate a response after 1 second
-      setTimeout(() => {
-        const responseElement = document.createElement("div");
-        responseElement.className = "bg-gray-200 p-3 rounded-lg max-w-xs";
-        responseElement.innerHTML = `
-          <p class="text-gray-800">Thanks for your message! This is a demo response.</p>
-          <p class="text-xs text-gray-500 mt-1">Just now</p>
-        `;
-        chatBox.appendChild(responseElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 1000);
-    };
-    
-    // Alert function
-    function showAlert(message, type) {
-      const alertElement = document.createElement("div");
-      
-      let bgColor, icon;
-      switch(type) {
-        case "success":
-          bgColor = "bg-green-100 border-green-400 text-green-700";
-          icon = '<i class="fas fa-check-circle mr-2"></i>';
-          break;
-        case "error":
-          bgColor = "bg-red-100 border-red-400 text-red-700";
-          icon = '<i class="fas fa-exclamation-circle mr-2"></i>';
-          break;
-        case "info":
-          bgColor = "bg-blue-100 border-blue-400 text-blue-700";
-          icon = '<i class="fas fa-info-circle mr-2"></i>';
-          break;
-        default:
-          bgColor = "bg-gray-100 border-gray-400 text-gray-700";
-          icon = '<i class="fas fa-bell mr-2"></i>';
-      }
-      
-      alertElement.className = `fixed top-4 right-4 px-4 py-3 rounded border ${bgColor} flex items-center shadow-lg z-50`;
-      alertElement.innerHTML = `
-        ${icon}
-        <span>${message}</span>
-        <button class="ml-4 text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
-      `;
-      
-      document.body.appendChild(alertElement);
-      
-      // Remove alert after clicking close button
-      alertElement.querySelector("button").addEventListener("click", () => {
-        alertElement.remove();
-      });
-      
-      // Auto-remove after 5 seconds
-      setTimeout(() => {
-        if (document.body.contains(alertElement)) {
-          alertElement.remove();
-        }
-      }, 5000);
-    }
-    
-    // Listen for auth state changes
+    });
+
+    // Authentication state observer
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in
-        document.getElementById("auth-section").style.display = "none";
-        document.getElementById("main-app").style.display = "flex";
-        
-        // Update UI with user info
-        document.getElementById("user-email").textContent = user.email;
-        
-        // Set user initials in avatar
-        const initials = user.email ? user.email.substring(0, 1).toUpperCase() : "U";
-        document.getElementById("user-initials").textContent = initials;
-        
-        // Load projects
+        authSection.style.display = 'none';
+        mainApp.style.display = 'block';
+        userMenu.style.display = 'block';
         loadProjects();
-        
-        // Load notifications
         loadNotifications();
       } else {
         // User is signed out
-        document.getElementById("auth-section").style.display = "flex";
-        document.getElementById("main-app").style.display = "none";
+        authSection.style.display = 'flex';
+        mainApp.style.display = 'none';
+        userMenu.style.display = 'none';
+      }
+    });
+
+    // Login functionality
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // Success message would appear via onAuthStateChanged
+      } catch (error) {
+        alert(`Signup error: ${error.message}`);
       }
     });
     
-    // Load projects
-    function loadProjects() {
-      const projectListDiv = document.getElementById("project-list");
-      const myProjectsListDiv = document.getElementById("my-projects-list");
+    // Google signup - same functionality as login
+    document.getElementById('google-signup-btn').addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        alert(`Google signup error: ${error.message}`);
+      }
+    });
+
+    // Logout functionality
+    logoutButton.addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // Load all projects
+    async function loadProjects() {
+      const projectsQuery = query(collection(db, 'projects'), orderBy('timestamp', 'desc'));
       
-      onSnapshot(collection(db, "projects"), (snapshot) => {
-        // Clear project lists
-        projectListDiv.innerHTML = "";
-        myProjectsListDiv.innerHTML = "";
+      onSnapshot(projectsQuery, (snapshot) => {
+        projectsList.innerHTML = '';
+        let count = 0;
         
-        // Counter for my projects
-        let myProjectCount = 0;
-        
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const id = docSnap.id;
+        snapshot.forEach(doc => {
+          const project = doc.data();
+          const projectId = doc.id;
+          count++;
           
-          // Format date
-          const date = new Date(data.createdAt || Date.now());
-          const formattedDate = date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-          });
+          // Create project card
+          const projectCard = createProjectCard(project, projectId);
+          projectsList.appendChild(projectCard);
           
-          // Create project card for all projects
-          const projectCard = document.createElement("div");
-          projectCard.className = "bg-white shadow rounded-lg overflow-hidden card";
-          
-          // Generate role badges HTML
-          const rolesBadges = data.roles.map(role => 
-            `<span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2 mb-2">${role}</span>`
-          ).join('');
-          
-          projectCard.innerHTML = `
-            <div class="p-5">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">${data.title}</h3>
-              <p class="text-gray-600 text-sm mb-4">${data.desc}</p>
-              <div class="mb-4">
-                ${rolesBadges}
-              </div>
-              <div class="flex items-center text-sm text-gray-500 mb-4">
-                <i class="fas fa-user mr-1"></i>
-                <span>${data.createdByEmail}</span>
-                <span class="mx-2">•</span>
-                <i class="far fa-calendar mr-1"></i>
-                <span>${formattedDate}</span>
-              </div>
-              ${data.createdBy === auth.currentUser?.uid
-                ? `<button onclick="editRoles('${id}')" class="mr-2 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                    <i class="fas fa-edit mr-1"></i> Edit Roles
-                  </button>`
-                : `<button onclick="applyProject('${id}')" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class="fas fa-paper-plane mr-1"></i> Apply
-                  </button>`
-              }
-            </div>
-          `;
-          
-          // Add to project list
-          projectListDiv.appendChild(projectCard);
-          
-          // Create card for my projects section if user is creator
-          if (data.createdBy === auth.currentUser?.uid) {
-            myProjectCount++;
+          // Also add to my projects if created by current user
+          if (project.createdBy === auth.currentUser.uid) {
+            const myProjectCard = createProjectCard(project, projectId, true);
             
-            const myProjectCard = document.createElement("div");
-            myProjectCard.className = "bg-white shadow rounded-lg overflow-hidden";
-            
-            // Count applicants
-            const applicantCount = data.applicants ? data.applicants.length : 0;
-            
-            myProjectCard.innerHTML = `
-              <div class="p-5">
-                <div class="flex justify-between items-start">
-                  <h3 class="text-xl font-semibold text-gray-900">${data.title}</h3>
-                  <span class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">
-                    ${applicantCount} applicant${applicantCount !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                <p class="mt-2 text-gray-600">${data.desc}</p>
-                <div class="mt-4">
-                  <p class="text-sm font-medium text-gray-700">Roles Needed:</p>
-                  <div class="mt-2 flex flex-wrap">
-                    ${rolesBadges}
-                  </div>
-                </div>
-                <div class="mt-5 flex justify-between items-center">
-                  <button onclick="editRoles('${id}')" class="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class="fas fa-edit mr-1"></i> Edit Roles
-                  </button>
-                  <span class="text-sm text-gray-500">Created: ${formattedDate}</span>
-                </div>
-              </div>
-            `;
-            
-            myProjectsListDiv.appendChild(myProjectCard);
+            // Replace any existing card or add new one
+            const existingCard = myProjectsList.querySelector(`[data-id="${projectId}"]`);
+            if (existingCard) {
+              myProjectsList.replaceChild(myProjectCard, existingCard);
+            } else {
+              myProjectsList.appendChild(myProjectCard);
+            }
           }
         });
         
-        // Show message if no projects in "My Projects"
-        if (myProjectCount === 0) {
-          myProjectsListDiv.innerHTML = `
-            <div class="bg-white shadow rounded-lg p-6 text-center">
-              <i class="fas fa-project-diagram text-4xl text-gray-300 mb-3"></i>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-              <p class="text-gray-600 mb-4">You haven't created any projects yet.</p>
-              <button onclick="showView('create')" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Create Your First Project
-              </button>
-            </div>
-          `;
-        }
+        // Update project count
+        projectCount.textContent = count;
         
-        // Show message if no projects at all
-        if (snapshot.empty) {
-          projectListDiv.innerHTML = `
-            <div class="col-span-full bg-white shadow rounded-lg p-6 text-center">
-              <i class="fas fa-search text-4xl text-gray-300 mb-3"></i>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No projects available</h3>
-              <p class="text-gray-600 mb-4">Be the first to create a project!</p>
-              <button onclick="showView('create')" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Create Project
-              </button>
-            </div>
-          `;
+        // Display message if no projects
+        if (count === 0) {
+          projectsList.innerHTML = '<div class="empty-state">No projects found. Try creating one!</div>';
         }
       });
     }
     
-    // Load notifications
-    function loadNotifications() {
-      const notifListDiv = document.getElementById("notif-list");
-      const notifBadge = document.getElementById("notif-badge");
+    // Create a project card
+    function createProjectCard(project, projectId, isMyProject = false) {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+      card.setAttribute('data-id', projectId);
       
-      onSnapshot(query(collection(db, "notifications")), (snapshot) => {
-        notifListDiv.innerHTML = "";
-        let unreadCount = 0;
-        
-        // Exit if no user is logged in
-        if (!auth.currentUser) return;
-        
-        snapshot.forEach(docSnap => {
-          const notif = docSnap.data();
-          
-          // Only show notifications for current user
-          if (notif.to === auth.currentUser.uid) {
-            // Count unread notifications
-            if (!notif.read) {
-              unreadCount++;
+      // Create roles HTML
+      const rolesHTML = project.roles.map(role => 
+        `<span class="role-tag">${role}</span>`
+      ).join('');
+      
+      card.innerHTML = `
+        <div class="project-header">
+          <h3 class="project-title">${project.title || 'Untitled Project'}</h3>
+          <div class="project-creator">
+            <i class="fas fa-user"></i>
+            <span>${project.createdByEmail || 'Anonymous'}</span>
+          </div>
+        </div>
+        <div class="project-body">
+          <p class="project-description">${project.desc || 'No description provided.'}</p>
+          <div class="project-roles">
+            ${rolesHTML}
+          </div>
+        </div>
+        <div class="project-footer">
+          <div class="project-meta">
+            <i class="far fa-clock"></i>
+            <span>${formatTimestamp(project.timestamp)}</span>
+          </div>
+          <div class="project-actions">
+            ${!isMyProject ? 
+              `<button class="btn apply-btn" data-id="${projectId}">Apply</button>` : 
+              `<button class="btn btn-outline edit-btn" data-id="${projectId}">Edit</button>`
             }
-            
-            // Create notification element
-            const notifElement = document.createElement("div");
-            notifElement.className = `p-4 ${notif.read ? 'bg-white' : 'bg-indigo-50'}`;
-            
-            // Format time
-            const date = new Date(notif.timestamp);
-            const formattedTime = date.toLocaleString('en-US', { 
-              month: 'short', 
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit'
-            });
-            
-            notifElement.innerHTML = `
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                    <i class="fas fa-bell"></i>
-                  </div>
-                </div>
-                <div class="ml-3 flex-1">
-                  <p class="text-sm font-medium text-gray-900">${notif.message}</p>
-                  <p class="mt-1 text-sm text-gray-500">${formattedTime}</p>
-                </div>
-              </div>
-            `;
-            
-            notifListDiv.appendChild(notifElement);
+          </div>
+        </div>
+      `;
+      
+      // Add event listener for apply button
+      if (!isMyProject) {
+        const applyBtn = card.querySelector('.apply-btn');
+        applyBtn.addEventListener('click', () => applyToProject(projectId));
+      } else {
+        const editBtn = card.querySelector('.edit-btn');
+        editBtn.addEventListener('click', () => editProject(projectId));
+      }
+      
+      return card;
+    }
+    
+    // Format timestamp
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return 'Just now';
+      
+      // Convert Firebase timestamp to JS Date
+      const date = timestamp instanceof Timestamp ? 
+        timestamp.toDate() : 
+        new Date(timestamp);
+      
+      // Calculate time difference
+      const now = new Date();
+      const diffMs = now - date;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      
+      if (diffDays > 0) {
+        return diffDays === 1 ? 'Yesterday' : `${diffDays} days ago`;
+      } else if (diffHrs > 0) {
+        return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+      } else if (diffMins > 0) {
+        return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+      } else {
+        return 'Just now';
+      }
+    }
+    
+    // Apply to project
+    async function applyToProject(projectId) {
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      try {
+        // Get project data
+        const projectRef = doc(db, 'projects', projectId);
+        const projectSnap = await getDocs(query(collection(db, 'projects'), where('__name__', '==', projectId)));
+        
+        if (!projectSnap.empty) {
+          const projectData = projectSnap.docs[0].data();
+          
+          // Check if already applied
+          if (projectData.applicants && projectData.applicants.includes(user.uid)) {
+            alert('You have already applied to this project.');
+            return;
           }
+          
+          // Update project with new applicant
+          await updateDoc(projectRef, {
+            applicants: arrayUnion(user.uid)
+          });
+          
+          // Add notification for project creator
+          await addDoc(collection(db, 'notifications'), {
+            to: projectData.createdBy,
+            message: `${user.email} applied to your project "${projectData.title}"`,
+            timestamp: serverTimestamp(),
+            projectId: projectId,
+            type: 'application',
+            read: false
+          });
+          
+          alert('Applied successfully!');
+        }
+      } catch (error) {
+        console.error('Error applying to project:', error);
+        alert('Error applying to project. Please try again.');
+      }
+    }
+    
+    // Edit project (basic implementation)
+    function editProject(projectId) {
+      // Navigate to create view with project data
+      showView('create');
+      
+      // TODO: Load project data into form
+      alert('Edit functionality not implemented yet.');
+    }
+    
+    // Create a new project
+    createProjectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('project-title').value;
+      const desc = document.getElementById('project-desc').value;
+      const roles = document.getElementById('project-roles').value.split(',').map(r => r.trim());
+      const category = document.getElementById('project-category').value;
+      const location = document.getElementById('project-location').value;
+      
+      try {
+        await addDoc(collection(db, 'projects'), {
+          title,
+          desc,
+          roles,
+          category,
+          location,
+          createdBy: auth.currentUser.uid,
+          createdByEmail: auth.currentUser.email,
+          applicants: [],
+          timestamp: serverTimestamp()
         });
         
-        // Update badge count
-        if (unreadCount > 0) {
-          notifBadge.textContent = unreadCount;
-          notifBadge.classList.remove('hidden');
-        } else {
-          notifBadge.classList.add('hidden');
+        alert('Project created successfully!');
+        
+        // Clear form and go back to home
+        createProjectForm.reset();
+        showView('home');
+      } catch (error) {
+        console.error('Error creating project:', error);
+        alert('Error creating project. Please try again.');
+      }
+    });
+    
+    // Cancel create project
+    document.getElementById('cancel-create').addEventListener('click', () => {
+      createProjectForm.reset();
+      showView('home');
+    });
+    
+    // Load notifications
+    function loadNotifications() {
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      const notifQuery = query(
+        collection(db, 'notifications'),
+        where('to', '==', user.uid),
+        orderBy('timestamp', 'desc')
+      );
+      
+      onSnapshot(notifQuery, (snapshot) => {
+        let unreadCount = 0;
+        notificationList.innerHTML = '';
+        
+        if (snapshot.empty) {
+          notificationList.innerHTML = '<li class="notification-empty">No notifications yet</li>';
+          notificationCount.textContent = '0';
+          notificationCount.style.display = 'none';
+          return;
         }
         
-        // Display message if no notifications
-        if (notifListDiv.innerHTML === '') {
-          notifListDiv.innerHTML = `
-            <div class="py-8 px-4 text-center">
-              <i class="fas fa-bell-slash text-3xl text-gray-300 mb-3"></i>
-              <p class="text-gray-500">No notifications yet</p>
-            </div>
+        snapshot.forEach(doc => {
+          const notif = doc.data();
+          const notifId = doc.id;
+          
+          // Count unread notifications
+          if (!notif.read) {
+            unreadCount++;
+          }
+          
+          // Create notification item
+          const notifItem = document.createElement('li');
+          notifItem.className = `notification-item ${notif.read ? '' : 'unread'}`;
+          notifItem.setAttribute('data-id', notifId);
+          
+          notifItem.innerHTML = `
+            <p class="notification-content">${notif.message}</p>
+            <p class="notification-time">${formatTimestamp(notif.timestamp)}</p>
           `;
-        }
+          
+          // Add click event to mark as read
+          notifItem.addEventListener('click', () => {
+            markNotificationAsRead(notifId);
+            
+            // If it has a projectId, navigate to that project
+            if (notif.projectId) {
+              // TODO: Navigate to project details
+              alert('Navigation to project details not implemented yet.');
+            }
+          });
+          
+          notificationList.appendChild(notifItem);
+        });
+        
+        // Update unread count badge
+        notificationCount.textContent = unreadCount;
+        notificationCount.style.display = unreadCount > 0 ? 'flex' : 'none';
       });
     }
-  </script>
-</body>
-</html>
+    
+    // Mark notification as read
+    async function markNotificationAsRead(notifId) {
+      try {
+        await updateDoc(doc(db, 'notifications', notifId), {
+          read: true
+        });
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    }
+    
+    // Mark all notifications as read
+    markAllReadButton.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      try {
+        const notifQuery = query(
+          collection(db, 'notifications'),
+          where('to', '==', user.uid),
+          where('read', '==', false)
+        );
+        
+        const snapshot = await getDocs(notifQuery);
+        
+        const batch = db.batch();
+        snapshot.forEach(doc => {
+          batch.update(doc.ref, { read: true });
+        });
+        
+        await batch.commit();
+        
+        // Close dropdown
+        notificationDropdown.classList.remove('show');
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+      }
+    });
+    
+    // Toggle notification dropdown
+    notificationToggle.addEventListener('click', () => {
+      notificationDropdown.classList.toggle('show');
+    });
+    
+    // Close notification dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!notificationToggle.contains(e.target) && !notificationDropdown.contains(e.target)) {
+        notificationDropdown.classList.remove('show');
+      }
+    });
+    
+    // Navigation between views
+    function showView(viewName) {
+      // Hide all views
+      viewHome.style.display = 'none';
+      viewCreate.style.display = 'none';
+      viewMyProjects.style.display = 'none';
+      
+      // Show selected view
+      switch (viewName) {
+        case 'home':
+          viewHome.style.display = 'block';
+          break;
+        case 'create':
+          viewCreate.style.display = 'block';
+          break;
+        case 'myProjects':
+          viewMyProjects.style.display = 'block';
+          break;
+      }
+    }
+    
+    // My Projects button
+    document.getElementById('my-projects-btn').addEventListener('click', () => {
+      showView('myProjects');
+    });
+    
+    // Search functionality
+    searchInput.addEventListener('input', filterProjects);
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      filterProjects();
+    });
+    
+    function filterProjects() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const projectCards = projectsList.querySelectorAll('.project-card');
+      let visibleCount = 0;
+      
+      projectCards.forEach(card => {
+        const title = card.querySelector('.project-title').textContent.toLowerCase();
+        const desc = card.querySelector('.project-description').textContent.toLowerCase();
+        const roles = Array.from(card.querySelectorAll('.role-tag'))
+          .map(tag => tag.textContent.toLowerCase());
+        
+        // Check if project matches search term
+        const matchesSearch = 
+          title.includes(searchTerm) || 
+          desc.includes(searchTerm) || 
+          roles.some(role => role.includes(searchTerm));
+        
+        // Show/hide card
+        card.style.display = matchesSearch ? 'block' : 'none';
+        
+        if (matchesSearch) visibleCount++;
+      });
+      
+      // Update count
+      projectCount.textContent = visibleCount;
+    }
+    
+    // Initialize app
+    // Default to home view
+    showView('home');) {
+        alert(`Login error: ${error.message}`);
+      }
+    });
+
+    // Google login
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        alert(`Google login error: ${error.message}`);
+      }
+    });
+
+    // Signup functionality
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        // Success message would appear via onAuthStateChanged
+        authTabs[0].click(); // Switch to login tab
+      } catch (error
