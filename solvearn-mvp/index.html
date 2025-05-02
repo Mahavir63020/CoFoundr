@@ -167,28 +167,43 @@
 
   const notifListDiv = document.getElementById("notif-list");
 
-onSnapshot(query(collection(db, "notifications")), (snapshot) => {
-  notifListDiv.innerHTML = "";
-  snapshot.forEach(docSnap => {
-    const notif = docSnap.data();
+notifListDiv.innerHTML = "";
+snapshot.forEach(docSnap => {
+  const notif = docSnap.data();
+  const notifId = docSnap.id;
 
-    if (notif.to === auth.currentUser.uid && notif.message) {
-      const notifDiv = document.createElement("div");
-
-      notifDiv.innerHTML = `
-        <p>${notif.message}</p>
-        <small>${new Date(notif.timestamp).toLocaleString()}</small><br>
-        ${notif.status === "pending" ? `
-          <button onclick="respondApplication('${docSnap.id}', 'accepted', '${notif.from}', '${notif.projectTitle}')">✅ Accept</button>
-          <button onclick="respondApplication('${docSnap.id}', 'rejected', '${notif.from}', '${notif.projectTitle}')">❌ Reject</button>
-        ` : notif.status ? `<p style="color:gray;">Already ${notif.status}</p>` : ''}
-        <hr>
-      `;
-
-      notifListDiv.appendChild(notifDiv);
-    }
-  });
+  if (notif.to === auth.currentUser.uid) {
+    const notifDiv = document.createElement("div");
+    notifDiv.innerHTML = `
+      <p>${notif.message}</p>
+      <small>${new Date(notif.timestamp).toLocaleString()}</small>
+      ${notif.status === "pending" ? `
+        <br>
+        <button onclick="handleResponse('${notifId}', 'accepted', '${notif.from}', '${notif.projectTitle}')">Accept</button>
+        <button onclick="handleResponse('${notifId}', 'rejected', '${notif.from}', '${notif.projectTitle}')">Reject</button>
+      ` : `<p>Status: ${notif.status}</p>`}
+      <hr>
+    `;
+    notifListDiv.appendChild(notifDiv);
+  }
 });
+
+  window.handleResponse = async function (notifId, decision, applicantUid, projectTitle) {
+  const notifRef = doc(db, "notifications", notifId);
+
+  // Update status in original notification
+  await updateDoc(notifRef, { status: decision });
+
+  // Send reply notification back to applicant
+  await addDoc(collection(db, "notifications"), {
+    to: applicantUid,
+    message: `Your application for "${projectTitle}" was ${decision}.`,
+    timestamp: Date.now(),
+    read: false
+  });
+
+  alert(`Application ${decision}`);
+};
 
 
 
