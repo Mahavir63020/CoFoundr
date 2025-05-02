@@ -1,261 +1,249 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Solvearn MVP</title>
-    <style>
-        .view { display: none; }
-        .view.active { display: block; }
-        #notifications-panel {
-            position: fixed;
-            right: 10px;
-            top: 60px;
-            width: 300px;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 10px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .chat-message {
-            padding: 8px;
-            margin: 4px;
-            border-radius: 4px;
-        }
-        .chat-message.sent {
-            background: #e3f2fd;
-            margin-left: 20%;
-        }
-        .chat-message.received {
-            background: #f5f5f5;
-            margin-right: 20%;
-        }
-    </style>
-    <link rel="stylesheet" href="css/styles.css">
+  <title>Solvearn MVP</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div id="auth-section">
-        <h2>Welcome to Solvearn</h2>
-        <button onclick="googleLogin()" class="google-btn">Sign In with Google</button>
-    </div>
 
-    <div id="main-app" style="display:none;">
-        <header>
-            <nav>
-                <button onclick="showView('home')">Home</button>
-                <button onclick="showView('create')">Create Project</button>
-                <button onclick="showView('myProjects')">My Projects</button>
-                <button onclick="showView('notifications')">Notifications</button>
-                <button onclick="showView('chat')">Chat</button>
-                <button onclick="logout()" class="logout-btn">Log Out</button>
-            </nav>
-        </header>
+<div id="auth-section">
+  <h2>Sign Up</h2>
+  <input type="email" id="signup-email" placeholder="Email"><br>
+  <input type="password" id="signup-password" placeholder="Password"><br>
+  <button onclick="signup()">Sign Up</button>
 
-        <div id="notifications-panel"></div>
+  <h2>Login</h2>
+  <input type="email" id="login-email" placeholder="Email"><br>
+  <input type="password" id="login-password" placeholder="Password"><br>
+  <button onclick="login()">Log In</button>
 
-        <main>
-            <div id="home" class="view active">
-                <h2>All Projects</h2>
-                <div id="project-list"></div>
-            </div>
+  <hr>
+  <button onclick="googleLogin()">Sign In with Google</button>
+</div>
 
-            <div id="create" class="view">
-                <h2>Create a Project</h2>
-                <form id="create-form" onsubmit="createProject(event)">
-                    <input type="text" id="project-title" placeholder="Project Title" required><br>
-                    <textarea id="project-desc" placeholder="Project Description" required></textarea><br>
-                    <input type="text" id="project-roles" placeholder="Roles (comma-separated: e.g. Designer,Frontend)" required><br>
-                    <button type="submit">Create Project</button>
-                </form>
-            </div>
+<div id="main-app" style="display:none;">
+  <button onclick="logout()">Log Out</button>
+  <!-- Your main app content goes here -->
+    
+    <h2>Create a Project</h2>
+<input id="project-title" placeholder="Project Title"><br>
+<textarea id="project-desc" placeholder="Project Description"></textarea><br>
+<input id="project-roles" placeholder="Roles (comma-separated: e.g. Designer,Frontend)"><br>
+<button onclick="createProject()">Create Project</button>
 
-            <div id="notifications" class="view">
-                <h2>Notifications</h2>
-                <div id="notifications-list"></div>
-            </div>
+<hr>
 
-            <div id="chat" class="view">
-                <h2>Conversations</h2>
-                <div id="chat-list"></div>
-                <div id="active-chat" style="display:none;">
-                    <div id="chat-messages"></div>
-                    <div id="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="Type a message">
-                        <button onclick="sendMessage()">Send</button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+<h2>All Projects</h2>
+<div id="project-list"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import {
-            getAuth,
-            signOut,
-            GoogleAuthProvider,
-            signInWithPopup,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import {
-            getFirestore,
-            collection,
-            addDoc,
-            getDocs,
-            onSnapshot,
-            query,
-            where,
-            doc,
-            updateDoc,
-            arrayUnion,
-            serverTimestamp,
-            deleteDoc
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
-            authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
-            projectId: "solvearn-mvp-a00f1",
-            storageBucket: "solvearn-mvp-a00f1.firebasestorage.app",
-            messagingSenderId: "71657733409",
-            appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
-            measurementId: "G-NJGT0SJ2TP"
-        };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+  <nav>
+    <button onclick="showView('home')">Home</button>
+    <button onclick="showView('create')">Create Project</button>
+    <button onclick="showView('myProjects')">My Projects</button>
+    <button onclick="showView('chat')">Chat</button>
+  </nav>
 
-        // User Management
-        async function handleUserProfile(user) {
-            const userRef = doc(db, "users", user.uid);
-            await updateDoc(userRef, {
-                name: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                lastLogin: serverTimestamp()
-            }, { merge: true });
-        }
+  <div id="home" class="view">
+    <h1>Featured Projects</h1>
+    <div id="project-list"></div>
+  </div>
 
-        window.googleLogin = async function() {
-            const provider = new GoogleAuthProvider();
-            try {
-                const result = await signInWithPopup(auth, provider);
-                await handleUserProfile(result.user);
-            } catch (error) {
-                alert("Login error: " + error.message);
-            }
-        };
+  <div id="create" class="view" style="display: none;">
+    <h1>Create a Project</h1>
+    <form id="create-form">
+      <input type="text" id="project-name" placeholder="Project Name" required><br>
+      <textarea id="project-desc" placeholder="Description" required></textarea><br>
+      <input type="text" id="project-roles" placeholder="Roles (comma separated)" required><br>
+      <button type="submit">Create</button>
+    </form>
+  </div>
 
-        window.logout = () => signOut(auth);
+  <div id="myProjects" class="view" style="display: none;">
+    <h1>My Projects</h1>
+    <div id="my-projects-list"></div>
+  </div>
 
-        // Project Management
-        window.createProject = async function(e) {
-            e.preventDefault();
-            const project = {
-                title: document.getElementById("project-title").value,
-                description: document.getElementById("project-desc").value,
-                roles: document.getElementById("project-roles").value.split(",").map(r => ({
-                    title: r.trim(),
-                    filled: false,
-                    applicants: []
-                })),
-                createdBy: auth.currentUser.uid,
-                createdAt: serverTimestamp()
-            };
+  <div id="chat" class="view" style="display: none;">
+    <h1>Chat</h1>
+    <div id="chat-box">No messages yet</div>
+    <input id="chat-input" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+  </div>
 
-            try {
-                await addDoc(collection(db, "projects"), project);
-                alert("Project created!");
-                showView('home');
-            } catch (err) {
-                alert("Error: " + err.message);
-            }
-        };
+  <script src="js/main.js"></script>
+  <script src="js/project.js"></script>
+  <script src="js/apply.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/auth.js"></script>
 
-        // Application System
-        window.applyForRole = async function(projectId, roleIndex) {
-            const application = {
-                projectId,
-                applicantId: auth.currentUser.uid,
-                roleIndex,
-                status: "pending",
-                createdAt: serverTimestamp()
-            };
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup
+  } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-            await addDoc(collection(db, "applications"), application);
-            await addDoc(collection(db, "notifications"), {
-                recipientId: projectCreatorId,
-                type: "application",
-                projectId,
-                applicantId: auth.currentUser.uid,
-                roleIndex,
-                read: false,
-                createdAt: serverTimestamp()
-            });
-        };
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Notifications
-        function setupNotifications() {
-            const notificationsQuery = query(
-                collection(db, "notifications"),
-                where("recipientId", "==", auth.currentUser.uid)
-            );
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
+    authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
+    projectId: "solvearn-mvp-a00f1",
+    storageBucket: "solvearn-mvp-a00f1.firebasestorage.app",
+    messagingSenderId: "71657733409",
+    appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
+    measurementId: "G-NJGT0SJ2TP"
+  };
 
-            onSnapshot(notificationsQuery, (snapshot) => {
-                const notifications = [];
-                snapshot.forEach(doc => {
-                    notifications.push({ id: doc.id, ...doc.data() });
-                });
-                renderNotifications(notifications);
-            });
-        }
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-        // Chat System
-        function setupChat() {
-            const chatsQuery = query(
-                collection(db, "chats"),
-                where("participants", "array-contains", auth.currentUser.uid)
-            );
+  // Signup with email/password
+  window.signup = async function () {
+    const email = document.getElementById("signup-email").value;
+    const password = document.getElementById("signup-password").value;
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("Signup successful!");
+    } catch (error) {
+      alert("Signup error: " + error.message);
+    }
+  };
 
-            onSnapshot(chatsQuery, (snapshot) => {
-                const chats = [];
-                snapshot.forEach(doc => {
-                    chats.push({ id: doc.id, ...doc.data() });
-                });
-                renderChats(chats);
-            });
-        }
+  // Login with email/password
+  window.login = async function () {
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login successful!");
+    } catch (error) {
+      alert("Login error: " + error.message);
+    }
+  };
 
-        window.sendMessage = async function() {
-            const message = document.getElementById("chat-input").value;
-            const activeChatId = document.getElementById("active-chat").dataset.chatId;
-            
-            await addDoc(collection(db, `chats/${activeChatId}/messages`), {
-                text: message,
-                senderId: auth.currentUser.uid,
-                createdAt: serverTimestamp()
-            });
-        };
+  // Login with Google
+  window.googleLogin = async function () {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      alert("Google login successful!");
+    } catch (error) {
+      alert("Google login error: " + error.message);
+    }
+  };
 
-        // View Management
-        window.showView = function(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        };
+  // Logout
+  window.logout = function () {
+    signOut(auth);
+  };
 
-        // Auth State Observer
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById("auth-section").style.display = "none";
-                document.getElementById("main-app").style.display = "block";
-                handleUserProfile(user);
-                setupNotifications();
-                setupChat();
-            } else {
-                document.getElementById("auth-section").style.display = "block";
-                document.getElementById("main-app").style.display = "none";
-            }
+  // Show/hide views
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Logged in:", user.email);
+      document.getElementById("auth-section").style.display = "none";
+      document.getElementById("main-app").style.display = "block";
+    } else {
+      document.getElementById("auth-section").style.display = "block";
+      document.getElementById("main-app").style.display = "none";
+    }
+  });
+
+    import {
+  collection,
+  addDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  doc,
+  updateDoc,
+  arrayRemove,
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+window.createProject = async function () {
+  const title = document.getElementById("project-title").value;
+  const desc = document.getElementById("project-desc").value;
+  const roles = document.getElementById("project-roles").value.split(",").map(r => r.trim());
+
+  try {
+    await addDoc(collection(db, "projects"), {
+      title,
+      desc,
+      roles,
+      createdBy: auth.currentUser.uid,
+      createdByEmail: auth.currentUser.email,
+      applicants: []
+    });
+    alert("Project created!");
+  } catch (err) {
+    alert("Error creating project: " + err.message);
+  }
+};
+
+// Show all projects live
+const projectListDiv = document.getElementById("project-list");
+onSnapshot(collection(db, "projects"), (snapshot) => {
+  projectListDiv.innerHTML = "";
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const projectDiv = document.createElement("div");
+    projectDiv.innerHTML = `
+      <h3>${data.title}</h3>
+      <p>${data.desc}</p>
+      <p><strong>Roles:</strong> ${data.roles.join(", ")}</p>
+      <p><strong>By:</strong> ${data.createdByEmail}</p>
+      <button onclick="applyProject('${docSnap.id}')">Apply</button>
+      ${data.createdBy === auth.currentUser?.uid
+        ? `<button onclick="removeRole('${docSnap.id}')">Edit Roles</button>`
+        : ''}
+      <hr>
+    `;
+    projectListDiv.appendChild(projectDiv);
+  });
+});
+
+// Apply to project
+window.applyProject = async function (id) {
+  const user = auth.currentUser;
+  const projRef = doc(db, "projects", id);
+  const snapshot = await getDocs(query(collection(db, "projects")));
+  snapshot.forEach(async (docSnap) => {
+    if (docSnap.id === id) {
+      const data = docSnap.data();
+      if (data.applicants.includes(user.uid)) {
+        alert("Already applied!");
+      } else {
+        await updateDoc(projRef, {
+          applicants: [...data.applicants, user.uid]
         });
-    </script>
+        alert("Applied!");
+      }
+    }
+  });
+};
+
+// Edit roles (basic)
+window.removeRole = async function (id) {
+  const newRoles = prompt("Enter new roles (comma-separated)");
+  if (!newRoles) return;
+  await updateDoc(doc(db, "projects", id), {
+    roles: newRoles.split(",").map(r => r.trim())
+  });
+  alert("Roles updated!");
+};
+
+</script>
+
+
 </body>
 </html>
