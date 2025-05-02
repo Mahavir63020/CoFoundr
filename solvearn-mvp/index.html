@@ -171,17 +171,25 @@ onSnapshot(query(collection(db, "notifications")), (snapshot) => {
   notifListDiv.innerHTML = "";
   snapshot.forEach(docSnap => {
     const notif = docSnap.data();
-    if (notif.to === auth.currentUser.uid) {
+
+    if (notif.to === auth.currentUser.uid && notif.message) {
       const notifDiv = document.createElement("div");
+
       notifDiv.innerHTML = `
         <p>${notif.message}</p>
-        <small>${new Date(notif.timestamp).toLocaleString()}</small>
+        <small>${new Date(notif.timestamp).toLocaleString()}</small><br>
+        ${notif.status === "pending" ? `
+          <button onclick="respondApplication('${docSnap.id}', 'accepted', '${notif.from}', '${notif.projectTitle}')">✅ Accept</button>
+          <button onclick="respondApplication('${docSnap.id}', 'rejected', '${notif.from}', '${notif.projectTitle}')">❌ Reject</button>
+        ` : notif.status ? `<p style="color:gray;">Already ${notif.status}</p>` : ''}
         <hr>
       `;
+
       notifListDiv.appendChild(notifDiv);
     }
   });
 });
+
 
 
     import {
@@ -277,6 +285,23 @@ window.removeRole = async function (id) {
   });
   alert("Roles updated!");
 };
+
+window.respondApplication = async function (notifId, status, applicantId, projectTitle) {
+  const notifRef = doc(db, "notifications", notifId);
+
+  // Update the original notification with status
+  await updateDoc(notifRef, { status });
+
+  // Send a new notification to applicant
+  await addDoc(collection(db, "notifications"), {
+    to: applicantId,
+    message: `Your application to "${projectTitle}" was ${status.toUpperCase()}`,
+    timestamp: Date.now()
+  });
+
+  alert(`Application ${status}!`);
+};
+
 
 </script>
 
