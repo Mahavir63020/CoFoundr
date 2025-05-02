@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -909,12 +910,23 @@
         alert(`Signup error: ${error.message}`);
       }
     });
+
+    // Google login
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        // Success will be handled by onAuthStateChanged
+      } catch (error) {
+        alert(`Google login error: ${error.message}`);
+      }
+    });
     
-    // Google signup - same functionality as login
     document.getElementById('google-signup-btn').addEventListener('click', async () => {
       const provider = new GoogleAuthProvider();
       try {
         await signInWithPopup(auth, provider);
+        // Success will be handled by onAuthStateChanged
       } catch (error) {
         alert(`Google signup error: ${error.message}`);
       }
@@ -922,191 +934,134 @@
 
     // Logout functionality
     logoutButton.addEventListener('click', () => {
-      signOut(auth);
+      signOut(auth)
+        .then(() => {
+          // Sign-out successful, handled by onAuthStateChanged
+        })
+        .catch((error) => {
+          alert(`Logout error: ${error.message}`);
+        });
     });
 
-    // Load all projects
-    async function loadProjects() {
-      const projectsQuery = query(collection(db, 'projects'), orderBy('timestamp', 'desc'));
+    // Load projects
+    function loadProjects() {
+      // Listen for project updates
+      const projectsQuery = query(collection(db, "projects"), orderBy("createdAt", "desc"));
       
       onSnapshot(projectsQuery, (snapshot) => {
         projectsList.innerHTML = '';
+        myProjectsList.innerHTML = '';
         let count = 0;
         
         snapshot.forEach(doc => {
-          const project = doc.data();
-          const projectId = doc.id;
+          const project = { id: doc.id, ...doc.data() };
           count++;
           
           // Create project card
-          const projectCard = createProjectCard(project, projectId);
+          const projectCard = createProjectCard(project);
           projectsList.appendChild(projectCard);
           
-          // Also add to my projects if created by current user
+          // If current user is the creator, add to My Projects
           if (project.createdBy === auth.currentUser.uid) {
-            const myProjectCard = createProjectCard(project, projectId, true);
-            
-            // Replace any existing card or add new one
-            const existingCard = myProjectsList.querySelector(`[data-id="${projectId}"]`);
-            if (existingCard) {
-              myProjectsList.replaceChild(myProjectCard, existingCard);
-            } else {
-              myProjectsList.appendChild(myProjectCard);
-            }
+            const myProjectCard = createProjectCard(project, true);
+            myProjectsList.appendChild(myProjectCard);
           }
         });
         
         // Update project count
         projectCount.textContent = count;
         
-        // Display message if no projects
+        // Show empty state if needed
         if (count === 0) {
-          projectsList.innerHTML = '<div class="empty-state">No projects found. Try creating one!</div>';
+          projectsList.innerHTML = '<div class="empty-state">No projects found. Be the first to create one!</div>';
+        }
+        
+        if (myProjectsList.childElementCount === 0) {
+          myProjectsList.innerHTML = '<div class="empty-state">You haven\'t created any projects yet.</div>';
         }
       });
     }
-    
-    // Create a project card
-    function createProjectCard(project, projectId, isMyProject = false) {
+
+    // Create project card function
+    function createProjectCard(project, isMyProject = false) {
       const card = document.createElement('div');
       card.className = 'project-card';
-      card.setAttribute('data-id', projectId);
       
-      // Create roles HTML
-      const rolesHTML = project.roles.map(role => 
-        `<span class="role-tag">${role}</span>`
-      ).join('');
+      // Format roles as tags
+      const rolesTags = project.roles
+        .map(role => `<span class="role-tag">${role}</span>`)
+        .join('');
+      
+      // Format date if available
+      const createdDate = project.createdAt ? 
+        new Date(project.createdAt.toDate()).toLocaleDateString() : 
+        'Recently';
       
       card.innerHTML = `
         <div class="project-header">
-          <h3 class="project-title">${project.title || 'Untitled Project'}</h3>
+          <h3 class="project-title">${project.title}</h3>
           <div class="project-creator">
-            <i class="fas fa-user"></i>
+            <i class="fas fa-user-circle"></i>
             <span>${project.createdByEmail || 'Anonymous'}</span>
           </div>
         </div>
         <div class="project-body">
-          <p class="project-description">${project.desc || 'No description provided.'}</p>
+          <p class="project-description">${project.desc}</p>
           <div class="project-roles">
-            ${rolesHTML}
+            ${rolesTags}
           </div>
         </div>
         <div class="project-footer">
           <div class="project-meta">
-            <i class="far fa-clock"></i>
-            <span>${formatTimestamp(project.timestamp)}</span>
+            <i class="far fa-calendar-alt"></i> ${createdDate}
           </div>
           <div class="project-actions">
-            ${!isMyProject ? 
-              `<button class="btn apply-btn" data-id="${projectId}">Apply</button>` : 
-              `<button class="btn btn-outline edit-btn" data-id="${projectId}">Edit</button>`
+            ${isMyProject ? 
+              `<button class="btn btn-outline edit-project" data-id="${project.id}">
+                <i class="fas fa-edit"></i> Edit
+              </button>` : 
+              `<button class="btn apply-project" data-id="${project.id}">
+                <i class="fas fa-paper-plane"></i> Apply
+              </button>`
             }
           </div>
         </div>
       `;
       
-      // Add event listener for apply button
-      if (!isMyProject) {
-        const applyBtn = card.querySelector('.apply-btn');
-        applyBtn.addEventListener('click', () => applyToProject(projectId));
+      // Add event listeners
+      const actionButton = isMyProject ? 
+        card.querySelector('.edit-project') : 
+        card.querySelector('.apply-project');
+      
+      if (isMyProject) {
+        actionButton.addEventListener('click', () => editProject(project.id));
       } else {
-        const editBtn = card.querySelector('.edit-btn');
-        editBtn.addEventListener('click', () => editProject(projectId));
+        actionButton.addEventListener('click', () => applyToProject(project.id));
       }
       
       return card;
     }
-    
-    // Format timestamp
-    function formatTimestamp(timestamp) {
-      if (!timestamp) return 'Just now';
-      
-      // Convert Firebase timestamp to JS Date
-      const date = timestamp instanceof Timestamp ? 
-        timestamp.toDate() : 
-        new Date(timestamp);
-      
-      // Calculate time difference
-      const now = new Date();
-      const diffMs = now - date;
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      
-      if (diffDays > 0) {
-        return diffDays === 1 ? 'Yesterday' : `${diffDays} days ago`;
-      } else if (diffHrs > 0) {
-        return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
-      } else if (diffMins > 0) {
-        return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-      } else {
-        return 'Just now';
-      }
-    }
-    
-    // Apply to project
-    async function applyToProject(projectId) {
-      const user = auth.currentUser;
-      if (!user) return;
-      
-      try {
-        // Get project data
-        const projectRef = doc(db, 'projects', projectId);
-        const projectSnap = await getDocs(query(collection(db, 'projects'), where('__name__', '==', projectId)));
-        
-        if (!projectSnap.empty) {
-          const projectData = projectSnap.docs[0].data();
-          
-          // Check if already applied
-          if (projectData.applicants && projectData.applicants.includes(user.uid)) {
-            alert('You have already applied to this project.');
-            return;
-          }
-          
-          // Update project with new applicant
-          await updateDoc(projectRef, {
-            applicants: arrayUnion(user.uid)
-          });
-          
-          // Add notification for project creator
-          await addDoc(collection(db, 'notifications'), {
-            to: projectData.createdBy,
-            message: `${user.email} applied to your project "${projectData.title}"`,
-            timestamp: serverTimestamp(),
-            projectId: projectId,
-            type: 'application',
-            read: false
-          });
-          
-          alert('Applied successfully!');
-        }
-      } catch (error) {
-        console.error('Error applying to project:', error);
-        alert('Error applying to project. Please try again.');
-      }
-    }
-    
-    // Edit project (basic implementation)
-    function editProject(projectId) {
-      // Navigate to create view with project data
-      showView('create');
-      
-      // TODO: Load project data into form
-      alert('Edit functionality not implemented yet.');
-    }
-    
-    // Create a new project
+
+    // Create project functionality
     createProjectForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const title = document.getElementById('project-title').value;
       const desc = document.getElementById('project-desc').value;
-      const roles = document.getElementById('project-roles').value.split(',').map(r => r.trim());
+      const roles = document.getElementById('project-roles').value
+        .split(',')
+        .map(role => role.trim())
+        .filter(role => role.length > 0);
       const category = document.getElementById('project-category').value;
       const location = document.getElementById('project-location').value;
       
+      if (!title || !desc || roles.length === 0 || !category || !location) {
+        alert('Please fill out all required fields');
+        return;
+      }
+      
       try {
-        await addDoc(collection(db, 'projects'), {
+        await addDoc(collection(db, "projects"), {
           title,
           desc,
           roles,
@@ -1114,41 +1069,81 @@
           location,
           createdBy: auth.currentUser.uid,
           createdByEmail: auth.currentUser.email,
-          applicants: [],
-          timestamp: serverTimestamp()
+          createdAt: serverTimestamp(),
+          applicants: []
         });
         
-        alert('Project created successfully!');
-        
-        // Clear form and go back to home
+        // Clear form and show home view
         createProjectForm.reset();
         showView('home');
+        alert('Project created successfully!');
       } catch (error) {
-        console.error('Error creating project:', error);
-        alert('Error creating project. Please try again.');
+        alert(`Error creating project: ${error.message}`);
       }
     });
-    
-    // Cancel create project
+
+    // Cancel button on create form
     document.getElementById('cancel-create').addEventListener('click', () => {
       createProjectForm.reset();
       showView('home');
     });
-    
-    // Load notifications
+
+    // Apply to project
+    async function applyToProject(projectId) {
+      try {
+        const projectRef = doc(db, "projects", projectId);
+        const projectSnap = await getDocs(query(collection(db, "projects")));
+        
+        projectSnap.forEach(async (docSnap) => {
+          if (docSnap.id === projectId) {
+            const data = docSnap.data();
+            
+            if (data.applicants.includes(auth.currentUser.uid)) {
+              alert("You've already applied to this project!");
+              return;
+            }
+            
+            // Add user to applicants
+            await updateDoc(projectRef, {
+              applicants: arrayUnion(auth.currentUser.uid)
+            });
+            
+            // Create notification for project owner
+            await addDoc(collection(db, "notifications"), {
+              to: data.createdBy,
+              from: auth.currentUser.uid,
+              fromEmail: auth.currentUser.email,
+              message: `${auth.currentUser.email} applied to your project "${data.title}"`,
+              projectId: projectId,
+              projectTitle: data.title,
+              timestamp: serverTimestamp(),
+              read: false
+            });
+            
+            alert("Applied successfully! The project owner will be notified.");
+          }
+        });
+      } catch (error) {
+        alert(`Error applying to project: ${error.message}`);
+      }
+    }
+
+    // Edit project
+    function editProject(projectId) {
+      // Redirect to edit view or show modal
+      alert(`Edit functionality for project ${projectId} will be implemented in the next version.`);
+    }
+
+    // Notifications
     function loadNotifications() {
-      const user = auth.currentUser;
-      if (!user) return;
-      
-      const notifQuery = query(
-        collection(db, 'notifications'),
-        where('to', '==', user.uid),
-        orderBy('timestamp', 'desc')
+      const notificationsQuery = query(
+        collection(db, "notifications"),
+        where("to", "==", auth.currentUser.uid),
+        orderBy("timestamp", "desc")
       );
       
-      onSnapshot(notifQuery, (snapshot) => {
+      onSnapshot(notificationsQuery, (snapshot) => {
         let unreadCount = 0;
-        notificationList.innerHTML = '';
         
         if (snapshot.empty) {
           notificationList.innerHTML = '<li class="notification-empty">No notifications yet</li>';
@@ -1157,105 +1152,154 @@
           return;
         }
         
+        notificationList.innerHTML = '';
+        
         snapshot.forEach(doc => {
-          const notif = doc.data();
-          const notifId = doc.id;
+          const notif = { id: doc.id, ...doc.data() };
+          const timestamp = notif.timestamp instanceof Timestamp ? 
+            notif.timestamp.toDate() : 
+            new Date();
           
-          // Count unread notifications
+          const timeAgo = formatTimeAgo(timestamp);
+          
           if (!notif.read) {
             unreadCount++;
           }
           
-          // Create notification item
           const notifItem = document.createElement('li');
-          notifItem.className = `notification-item ${notif.read ? '' : 'unread'}`;
-          notifItem.setAttribute('data-id', notifId);
+          notifItem.className = `notification-item${notif.read ? '' : ' unread'}`;
+          notifItem.dataset.id = doc.id;
           
           notifItem.innerHTML = `
-            <p class="notification-content">${notif.message}</p>
-            <p class="notification-time">${formatTimestamp(notif.timestamp)}</p>
+            <div class="notification-content">${notif.message}</div>
+            <div class="notification-time">${timeAgo}</div>
           `;
           
-          // Add click event to mark as read
-          notifItem.addEventListener('click', () => {
-            markNotificationAsRead(notifId);
-            
-            // If it has a projectId, navigate to that project
-            if (notif.projectId) {
-              // TODO: Navigate to project details
-              alert('Navigation to project details not implemented yet.');
-            }
-          });
+          notifItem.addEventListener('click', () => viewNotification(doc.id));
           
           notificationList.appendChild(notifItem);
         });
         
-        // Update unread count badge
+        // Update unread count
         notificationCount.textContent = unreadCount;
         notificationCount.style.display = unreadCount > 0 ? 'flex' : 'none';
       });
     }
-    
-    // Mark notification as read
-    async function markNotificationAsRead(notifId) {
-      try {
-        await updateDoc(doc(db, 'notifications', notifId), {
-          read: true
-        });
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
+
+    // Format time ago
+    function formatTimeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+      
+      if (diffDay > 0) {
+        return diffDay === 1 ? '1 day ago' : `${diffDay} days ago`;
+      } else if (diffHour > 0) {
+        return diffHour === 1 ? '1 hour ago' : `${diffHour} hours ago`;
+      } else if (diffMin > 0) {
+        return diffMin === 1 ? '1 minute ago' : `${diffMin} minutes ago`;
+      } else {
+        return 'Just now';
       }
     }
-    
-    // Mark all notifications as read
-    markAllReadButton.addEventListener('click', async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      
+
+    // View notification
+    async function viewNotification(notifId) {
       try {
-        const notifQuery = query(
-          collection(db, 'notifications'),
-          where('to', '==', user.uid),
-          where('read', '==', false)
-        );
-        
-        const snapshot = await getDocs(notifQuery);
-        
-        const batch = db.batch();
-        snapshot.forEach(doc => {
-          batch.update(doc.ref, { read: true });
+        // Mark as read
+        await updateDoc(doc(db, "notifications", notifId), {
+          read: true
         });
         
-        await batch.commit();
-        
-        // Close dropdown
-        notificationDropdown.classList.remove('show');
+        // View notification details
+        alert('Notification details view will be implemented in the next version.');
       } catch (error) {
-        console.error('Error marking all notifications as read:', error);
+        console.error('Error updating notification:', error);
+      }
+    }
+
+    // Mark all notifications as read
+    markAllReadButton.addEventListener('click', async () => {
+      try {
+        const notificationsQuery = query(
+          collection(db, "notifications"),
+          where("to", "==", auth.currentUser.uid),
+          where("read", "==", false)
+        );
+        
+        const querySnapshot = await getDocs(notificationsQuery);
+        
+        const batch = [];
+        querySnapshot.forEach(doc => {
+          batch.push(updateDoc(doc.ref, { read: true }));
+        });
+        
+        await Promise.all(batch);
+        
+        alert('All notifications marked as read');
+      } catch (error) {
+        console.error('Error marking notifications as read:', error);
       }
     });
-    
+
     // Toggle notification dropdown
     notificationToggle.addEventListener('click', () => {
       notificationDropdown.classList.toggle('show');
     });
-    
+
     // Close notification dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!notificationToggle.contains(e.target) && !notificationDropdown.contains(e.target)) {
+    window.addEventListener('click', (e) => {
+      if (!notificationToggle.contains(e.target) && 
+          !notificationDropdown.contains(e.target)) {
         notificationDropdown.classList.remove('show');
       }
     });
+
+    // Search functionality
+    searchInput.addEventListener('input', filterProjects);
     
-    // Navigation between views
+    function filterProjects() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const projects = document.querySelectorAll('.project-card');
+      let matchCount = 0;
+      
+      projects.forEach(project => {
+        const title = project.querySelector('.project-title').textContent.toLowerCase();
+        const description = project.querySelector('.project-description').textContent.toLowerCase();
+        const creator = project.querySelector('.project-creator').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || 
+            description.includes(searchTerm) || 
+            creator.includes(searchTerm)) {
+          project.style.display = 'block';
+          matchCount++;
+        } else {
+          project.style.display = 'none';
+        }
+      });
+      
+      projectCount.textContent = matchCount;
+      searchClear.style.display = searchTerm ? 'block' : 'none';
+    }
+    
+    // Clear search
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      filterProjects();
+    });
+
+    // Navigation
     function showView(viewName) {
       // Hide all views
-      viewHome.style.display = 'none';
-      viewCreate.style.display = 'none';
-      viewMyProjects.style.display = 'none';
+      document.querySelectorAll('.view-section').forEach(view => {
+        view.style.display = 'none';
+      });
       
-      // Show selected view
-      switch (viewName) {
+      // Show requested view
+      switch(viewName) {
         case 'home':
           viewHome.style.display = 'block';
           break;
@@ -1267,71 +1311,57 @@
           break;
       }
     }
-    
-    // My Projects button
+
+    // Navigation event listeners
     document.getElementById('my-projects-btn').addEventListener('click', () => {
       showView('myProjects');
     });
     
-    // Search functionality
-    searchInput.addEventListener('input', filterProjects);
-    searchClear.addEventListener('click', () => {
-      searchInput.value = '';
-      filterProjects();
-    });
+    // Filter dropdowns
+    const filterDropdowns = document.querySelectorAll('.filter-dropdown');
     
-    function filterProjects() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const projectCards = projectsList.querySelectorAll('.project-card');
-      let visibleCount = 0;
+    filterDropdowns.forEach(dropdown => {
+      const button = dropdown.querySelector('.filter-btn');
+      const content = dropdown.querySelector('.filter-dropdown-content');
       
-      projectCards.forEach(card => {
-        const title = card.querySelector('.project-title').textContent.toLowerCase();
-        const desc = card.querySelector('.project-description').textContent.toLowerCase();
-        const roles = Array.from(card.querySelectorAll('.role-tag'))
-          .map(tag => tag.textContent.toLowerCase());
+      button.addEventListener('click', () => {
+        // Close all other dropdowns
+        document.querySelectorAll('.filter-dropdown-content').forEach(c => {
+          if (c !== content) c.style.display = 'none';
+        });
         
-        // Check if project matches search term
-        const matchesSearch = 
-          title.includes(searchTerm) || 
-          desc.includes(searchTerm) || 
-          roles.some(role => role.includes(searchTerm));
-        
-        // Show/hide card
-        card.style.display = matchesSearch ? 'block' : 'none';
-        
-        if (matchesSearch) visibleCount++;
+        // Toggle this dropdown
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
       });
       
-      // Update count
-      projectCount.textContent = visibleCount;
-    }
-    
-    // Initialize app
-    // Default to home view
-    showView('home');) {
-        alert(`Login error: ${error.message}`);
-      }
+      // Handle selection
+      const items = content.querySelectorAll('.filter-dropdown-item');
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          button.textContent = item.textContent;
+          button.appendChild(document.createElement('i')).className = 'fas fa-chevron-down';
+          content.style.display = 'none';
+          
+          // Apply filter
+          filterProjects();
+        });
+      });
     });
 
-    // Google login
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        alert(`Google login error: ${error.message}`);
-      }
+    // Close dropdowns when clicking outside
+    window.addEventListener('click', (e) => {
+      filterDropdowns.forEach(dropdown => {
+        const button = dropdown.querySelector('.filter-btn');
+        const content = dropdown.querySelector('.filter-dropdown-content');
+        
+        if (!button.contains(e.target) && !content.contains(e.target)) {
+          content.style.display = 'none';
+        }
+      });
     });
 
-    // Signup functionality
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        // Success message would appear via onAuthStateChanged
-        authTabs[0].click(); // Switch to login tab
-      } catch (error
+    // Initialize view
+    showView('home');
+  </script>
+</body>
+</html>
