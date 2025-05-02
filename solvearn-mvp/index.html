@@ -36,6 +36,12 @@
 <h2>All Projects</h2>
 <div id="project-list"></div>
 
+<hr>
+  
+<h2>Your Notifications</h2>
+<div id="notif-list"></div>
+
+
 </div>
 
 
@@ -159,6 +165,25 @@
     }
   });
 
+  const notifListDiv = document.getElementById("notif-list");
+
+onSnapshot(query(collection(db, "notifications")), (snapshot) => {
+  notifListDiv.innerHTML = "";
+  snapshot.forEach(docSnap => {
+    const notif = docSnap.data();
+    if (notif.to === auth.currentUser.uid) {
+      const notifDiv = document.createElement("div");
+      notifDiv.innerHTML = `
+        <p>${notif.message}</p>
+        <small>${new Date(notif.timestamp).toLocaleString()}</small>
+        <hr>
+      `;
+      notifListDiv.appendChild(notifDiv);
+    }
+  });
+});
+
+
     import {
   collection,
   addDoc,
@@ -217,6 +242,7 @@ window.applyProject = async function (id) {
   const user = auth.currentUser;
   const projRef = doc(db, "projects", id);
   const snapshot = await getDocs(query(collection(db, "projects")));
+  
   snapshot.forEach(async (docSnap) => {
     if (docSnap.id === id) {
       const data = docSnap.data();
@@ -226,11 +252,21 @@ window.applyProject = async function (id) {
         await updateDoc(projRef, {
           applicants: [...data.applicants, user.uid]
         });
+
+        // ✅ Add notification to project creator
+        await addDoc(collection(db, "notifications"), {
+          to: data.createdBy,
+          message: `${user.email} applied to your project "${data.title}"`,
+          timestamp: Date.now(),
+          read: false
+        });
+
         alert("Applied!");
       }
     }
   });
 };
+
 
 // Edit roles (basic)
 window.removeRole = async function (id) {
