@@ -3,16 +3,121 @@
 <head>
   <title>Solvearn MVP</title>
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root {
+      --deep-teal: #087E8B;
+      --soft-white: #F5F5F5;
+      --charcoal: #363636;
+      --vibrant-coral: #FF5A5F;
+      --pale-gold: #FFD166;
+      --soft-sage: #97C1A9;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--soft-white);
+      color: var(--charcoal);
+    }
+
+    #auth-section, #main-app {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2, h3 {
+      color: var(--deep-teal);
+    }
+
+    input, textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid var(--deep-teal);
+      border-radius: 4px;
+      background-color: #fff;
+    }
+
+    button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--deep-teal);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--vibrant-coral);
+    }
+
+    button[type="submit"], 
+    button[onclick*="create"] {
+      background-color: var(--vibrant-coral);
+    }
+
+    button[onclick*="google"] {
+      background-color: var(--pale-gold);
+      color: var(--charcoal);
+    }
+
+    .success {
+      color: var(--soft-sage);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    nav button {
+      flex: 1;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    #project-list > div, 
+    #notif-list > div {
+      border: 1px solid var(--deep-teal);
+      border-radius: 4px;
+      padding: 15px;
+      margin: 10px 0;
+      background: white;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--deep-teal);
+      margin: 20px 0;
+    }
+  </style>
 </head>
 <body>
 
 <div id="auth-section">
-  <h2>Sign Up</h2>
+  <h2>Welcome to Solvearn</h2>
+  <h3>Sign Up</h3>
   <input type="email" id="signup-email" placeholder="Email"><br>
   <input type="password" id="signup-password" placeholder="Password"><br>
   <button onclick="signup()">Sign Up</button>
 
-  <h2>Login</h2>
+  <h3>Login</h3>
   <input type="email" id="login-email" placeholder="Email"><br>
   <input type="password" id="login-password" placeholder="Password"><br>
   <button onclick="login()">Log In</button>
@@ -22,42 +127,16 @@
 </div>
 
 <div id="main-app" style="display:none;">
-  <button onclick="logout()">Log Out</button>
-  <!-- Your main app content goes here -->
-    
-    <h2>Create a Project</h2>
-<input id="project-title" placeholder="Project Title"><br>
-<textarea id="project-desc" placeholder="Project Description"></textarea><br>
-<input id="project-roles" placeholder="Roles (comma-separated: e.g. Designer,Frontend)"><br>
-<button onclick="createProject()">Create Project</button>
+  <h2>Welcome to Solvearn</h2>
+  <button onclick="showView('create')">Create Project</button>
+  <button onclick="showView('notifications')">Notifications</button>
 
-<hr>
-
-<h2>All Projects</h2>
-<div id="project-list"></div>
-
-<hr>
-  
-<h2>Your Notifications</h2>
-<div id="notif-list"></div>
-
-
-</div>
-
-
-  <nav>
-    <button onclick="showView('home')">Home</button>
-    <button onclick="showView('create')">Create Project</button>
-    <button onclick="showView('myProjects')">My Projects</button>
-    <button onclick="showView('chat')">Chat</button>
-  </nav>
-
-  <div id="home" class="view">
-    <h1>Featured Projects</h1>
+  <div id="home" class="view active">
+    <h1>All Projects</h1>
     <div id="project-list"></div>
   </div>
 
-  <div id="create" class="view" style="display: none;">
+  <div id="create" class="view">
     <h1>Create a Project</h1>
     <form id="create-form">
       <input type="text" id="project-name" placeholder="Project Name" required><br>
@@ -67,24 +146,17 @@
     </form>
   </div>
 
-  <div id="myProjects" class="view" style="display: none;">
-    <h1>My Projects</h1>
-    <div id="my-projects-list"></div>
+  <div id="notifications" class="view">
+    <h1>Your Notifications</h1>
+    <div id="notif-list"></div>
   </div>
+</div>
 
-  <div id="chat" class="view" style="display: none;">
-    <h1>Chat</h1>
-    <div id="chat-box">No messages yet</div>
-    <input id="chat-input" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
-  </div>
-
-  <script src="js/main.js"></script>
-  <script src="js/project.js"></script>
-  <script src="js/apply.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/auth.js"></script>
-
+<script src="js/main.js"></script>
+<script src="js/project.js"></script>
+<script src="js/apply.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/auth.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import {
@@ -278,8 +350,14 @@ window.removeRole = async function (id) {
   alert("Roles updated!");
 };
 
+  // Show/hide views
+  window.showView = function(viewId) {
+    document.querySelectorAll('.view').forEach(view => {
+      view.classList.remove('active');
+    });
+    document.getElementById(viewId).classList.add('active');
+  };
 </script>
-
 
 </body>
 </html>
