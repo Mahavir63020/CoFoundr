@@ -41,6 +41,15 @@
 <h2>Your Notifications</h2>
 <div id="notif-list"></div>
 
+<h2>Start Chat</h2>
+<input id="chat-with" placeholder="Enter other user's email">
+<button onclick="startChat()">Start Chat</button>
+
+<div id="chat-box" style="border:1px solid #ccc; padding:10px; margin-top:10px;"></div>
+<input id="chat-msg" placeholder="Type a message">
+<button onclick="sendMessage()">Send</button>
+
+
 
 </div>
 
@@ -112,6 +121,69 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+
+import {
+  collection,
+  query,
+  orderBy,
+  addDoc,
+  onSnapshot,
+  doc
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+let currentChatId = "";
+let chattingWithEmail = "";
+
+window.startChat = async function () {
+  chattingWithEmail = document.getElementById("chat-with").value.trim();
+  if (!chattingWithEmail) return alert("Enter email");
+
+  // Find UID of the user
+  const usersSnap = await getDocs(collection(db, "projects")); // Projects have emails
+  let targetUid = "";
+  usersSnap.forEach(docSnap => {
+    if (docSnap.data().createdByEmail === chattingWithEmail) {
+      targetUid = docSnap.data().createdBy;
+    }
+  });
+
+  if (!targetUid) return alert("User not found");
+
+  const uid1 = auth.currentUser.uid;
+  const uid2 = targetUid;
+  currentChatId = [uid1, uid2].sort().join("_");
+
+  const messagesRef = collection(db, "chats", currentChatId, "messages");
+  const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+  onSnapshot(q, (snapshot) => {
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML = "";
+    snapshot.forEach(msgSnap => {
+      const data = msgSnap.data();
+      const msgEl = document.createElement("p");
+      msgEl.innerHTML = `<strong>${data.from === uid1 ? "You" : chattingWithEmail}:</strong> ${data.text}`;
+      chatBox.appendChild(msgEl);
+    });
+  });
+};
+
+window.sendMessage = async function () {
+  const text = document.getElementById("chat-msg").value;
+  if (!text || !currentChatId) return;
+
+  const messagesRef = collection(db, "chats", currentChatId, "messages");
+
+  await addDoc(messagesRef, {
+    from: auth.currentUser.uid,
+    to: chattingWithEmail,
+    text,
+    timestamp: Date.now()
+  });
+
+  document.getElementById("chat-msg").value = "";
+};
+
 
   // Signup with email/password
   window.signup = async function () {
