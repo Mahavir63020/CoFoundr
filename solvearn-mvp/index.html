@@ -1,239 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solvearn - Find Project Collaborators</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <style>
-    .gradient-bg {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-    .btn-gradient {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: all 0.3s ease;
-    }
-    .btn-gradient:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-  </style>
+  <title>Solvearn MVP</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-50 font-sans">
-  <!-- Auth Section -->
-  <div id="auth-section" class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-8">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-indigo-600">Solvearn</h1>
-        <p class="text-gray-600 mt-2">Connect, Collaborate, Create</p>
-      </div>
+<body>
 
-      <div class="mb-8">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Sign Up</h2>
-        <div class="space-y-4">
-          <input type="email" id="signup-email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <input type="password" id="signup-password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button onclick="signup()" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Create Account</button>
-        </div>
-      </div>
+<div id="auth-section">
+  <h2>Sign Up</h2>
+  <input type="email" id="signup-email" placeholder="Email"><br>
+  <input type="password" id="signup-password" placeholder="Password"><br>
+  <button onclick="signup()">Sign Up</button>
 
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Login</h2>
-        <div class="space-y-4">
-          <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button onclick="login()" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Log In</button>
-        </div>
-      </div>
+  <h2>Login</h2>
+  <input type="email" id="login-email" placeholder="Email"><br>
+  <input type="password" id="login-password" placeholder="Password"><br>
+  <button onclick="login()">Log In</button>
 
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500">Or continue with</span>
-        </div>
-      </div>
+  <hr>
+  <button onclick="googleLogin()">Sign In with Google</button>
+</div>
 
-      <button onclick="googleLogin()" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-        <img src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google" class="w-5 h-5 mr-2">
-        <span>Sign in with Google</span>
-      </button>
-    </div>
+<div id="main-app" style="display:none;">
+  <button onclick="logout()">Log Out</button>
+  <!-- Your main app content goes here -->
+    
+    <h2>Create a Project</h2>
+<input id="project-title" placeholder="Project Title"><br>
+<textarea id="project-desc" placeholder="Project Description"></textarea><br>
+<input id="project-roles" placeholder="Roles (comma-separated: e.g. Designer,Frontend)"><br>
+<button onclick="createProject()">Create Project</button>
+
+<hr>
+
+<h2>All Projects</h2>
+<div id="project-list"></div>
+
+<hr>
+  
+<h2>Your Notifications</h2>
+<div id="notif-list"></div>
+
+
+</div>
+
+
+  <nav>
+    <button onclick="showView('home')">Home</button>
+    <button onclick="showView('create')">Create Project</button>
+    <button onclick="showView('myProjects')">My Projects</button>
+    <button onclick="showView('chat')">Chat</button>
+  </nav>
+
+  <div id="home" class="view">
+    <h1>Featured Projects</h1>
+    <div id="project-list"></div>
   </div>
 
-  <!-- Main Application -->
-  <div id="main-app" class="min-h-screen flex flex-col" style="display:none;">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-10">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-indigo-600">Solvearn</h1>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
-              <button onclick="showView('home')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Home</button>
-              <button onclick="showView('create')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Create Project</button>
-              <button onclick="showView('myProjects')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">My Projects</button>
-              <button onclick="showView('chat')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Chat</button>
-            </div>
-          </div>
-          <div class="flex items-center">
-            <button id="notifications-btn" class="p-2 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-gray-100 relative">
-              <i class="fas fa-bell"></i>
-              <span id="notif-badge" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">0</span>
-            </button>
-            <div class="ml-3 relative">
-              <div>
-                <button id="user-menu-btn" class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="false" aria-haspopup="true">
-                  <span class="sr-only">Open user menu</span>
-                  <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                    <span id="user-initials">U</span>
-                  </div>
-                </button>
-              </div>
-              <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-                <div id="user-email" class="block px-4 py-2 text-sm text-gray-700 border-b"></div>
-                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
-              </div>
-            </div>
-            <div class="ml-3 sm:hidden">
-              <button id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
-                <i class="fas fa-bars"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Mobile menu, show/hide based on menu state -->
-      <div id="mobile-menu" class="sm:hidden hidden">
-        <div class="px-2 pt-2 pb-3 space-y-1">
-          <button onclick="showView('home')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Home</button>
-          <button onclick="showView('create')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Create Project</button>
-          <button onclick="showView('myProjects')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">My Projects</button>
-          <button onclick="showView('chat')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Chat</button>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Notifications Panel -->
-    <div id="notifications-panel" class="hidden fixed inset-0 overflow-hidden z-20" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
-          <div class="relative w-screen max-w-md">
-            <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
-              <div class="p-6">
-                <div class="flex items-start justify-between">
-                  <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Notifications</h2>
-                  <div class="ml-3 h-7 flex items-center">
-                    <button id="close-notifications" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none">
-                      <span class="sr-only">Close panel</span>
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="flex-1 px-4 sm:px-6">
-                <div id="notif-list" class="divide-y divide-gray-200">
-                  <!-- Notifications will be inserted here -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content Views -->
-    <div class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-      
-      <!-- Home View -->
-      <div id="home" class="view">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Featured Projects</h1>
-          <p class="text-gray-600">Find exciting projects to collaborate on</p>
-        </div>
-        <div id="project-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Projects will be inserted here -->
-        </div>
-      </div>
-      
-      <!-- Create Project View -->
-      <div id="create" class="view hidden">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Create a Project</h1>
-          <p class="text-gray-600">Share your idea and find talented collaborators</p>
-        </div>
-        <div class="bg-white shadow rounded-lg p-6">
-          <div class="space-y-6">
-            <div>
-              <label for="project-title" class="block text-sm font-medium text-gray-700">Project Title</label>
-              <input id="project-title" type="text" placeholder="E.g., Mobile App for Sustainable Shopping" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div>
-              <label for="project-desc" class="block text-sm font-medium text-gray-700">Project Description</label>
-              <textarea id="project-desc" rows="4" placeholder="Describe your project, goals, and vision..." class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-            </div>
-            <div>
-              <label for="project-roles" class="block text-sm font-medium text-gray-700">Roles Needed</label>
-              <input id="project-roles" type="text" placeholder="E.g., Designer, Frontend, Backend" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-              <p class="mt-2 text-sm text-gray-500">Separate roles with commas</p>
-            </div>
-            <div>
-              <button onclick="createProject()" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-md text-white btn-gradient shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Create Project
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- My Projects View -->
-      <div id="myProjects" class="view hidden">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">My Projects</h1>
-          <p class="text-gray-600">Manage your created projects and applications</p>
-        </div>
-        <div id="my-projects-list" class="space-y-6">
-          <!-- My projects will be inserted here -->
-        </div>
-      </div>
-      
-      <!-- Chat View -->
-      <div id="chat" class="view hidden">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">Messages</h1>
-          <p class="text-gray-600">Communicate with your collaborators</p>
-        </div>
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-          <div id="chat-box" class="h-96 overflow-y-auto p-4 space-y-3">
-            <div class="flex justify-center">
-              <p class="text-gray-500 text-sm">No messages yet</p>
-            </div>
-          </div>
-          <div class="border-t p-4 flex">
-            <input id="chat-input" type="text" placeholder="Type a message..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <button onclick="sendMessage()" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div id="create" class="view" style="display: none;">
+    <h1>Create a Project</h1>
+    <form id="create-form">
+      <input type="text" id="project-name" placeholder="Project Name" required><br>
+      <textarea id="project-desc" placeholder="Description" required></textarea><br>
+      <input type="text" id="project-roles" placeholder="Roles (comma separated)" required><br>
+      <button type="submit">Create</button>
+    </form>
   </div>
 
-  <script type="module">
+  <div id="myProjects" class="view" style="display: none;">
+    <h1>My Projects</h1>
+    <div id="my-projects-list"></div>
+  </div>
+
+  <div id="chat" class="view" style="display: none;">
+    <h1>Chat</h1>
+    <div id="chat-box">No messages yet</div>
+    <input id="chat-input" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/project.js"></script>
+  <script src="js/apply.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/auth.js"></script>
+
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
   import {
@@ -346,6 +198,8 @@
     alert("Applied successfully");
   };
 </script>
+
+
 
 </body>
 </html>
