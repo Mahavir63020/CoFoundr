@@ -1,280 +1,800 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Solvearn MVP</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solvearn - Find Project Collaborators</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .btn-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
-<body>
+<body class="bg-gray-50 font-sans">
+  <!-- Auth Section -->
+  <div id="auth-section" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-indigo-600">Solvearn</h1>
+        <p class="text-gray-600 mt-2">Connect, Collaborate, Create</p>
+      </div>
 
-<div id="auth-section">
-  <h2>Sign Up</h2>
-  <input type="email" id="signup-email" placeholder="Email"><br>
-  <input type="password" id="signup-password" placeholder="Password"><br>
-  <button onclick="signup()">Sign Up</button>
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Sign Up</h2>
+        <div class="space-y-4">
+          <input type="email" id="signup-email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <input type="password" id="signup-password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button onclick="signup()" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Create Account</button>
+        </div>
+      </div>
 
-  <h2>Login</h2>
-  <input type="email" id="login-email" placeholder="Email"><br>
-  <input type="password" id="login-password" placeholder="Password"><br>
-  <button onclick="login()">Log In</button>
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Login</h2>
+        <div class="space-y-4">
+          <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button onclick="login()" class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Log In</button>
+        </div>
+      </div>
 
-  <hr>
-  <button onclick="googleLogin()">Sign In with Google</button>
-</div>
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-white text-gray-500">Or continue with</span>
+        </div>
+      </div>
 
-<div id="main-app" style="display:none;">
-  <button onclick="logout()">Log Out</button>
-  <!-- Your main app content goes here -->
+      <button onclick="googleLogin()" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <img src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google" class="w-5 h-5 mr-2">
+        <span>Sign in with Google</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="main-app" class="min-h-screen flex flex-col" style="display:none;">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 flex items-center">
+              <h1 class="text-xl font-bold text-indigo-600">Solvearn</h1>
+            </div>
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
+              <button onclick="showView('home')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Home</button>
+              <button onclick="showView('create')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Create Project</button>
+              <button onclick="showView('myProjects')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">My Projects</button>
+              <button onclick="showView('chat')" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition-colors">Chat</button>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <button id="notifications-btn" class="p-2 rounded-full text-gray-500 hover:text-indigo-600 hover:bg-gray-100 relative">
+              <i class="fas fa-bell"></i>
+              <span id="notif-badge" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">0</span>
+            </button>
+            <div class="ml-3 relative">
+              <div>
+                <button id="user-menu-btn" class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="false" aria-haspopup="true">
+                  <span class="sr-only">Open user menu</span>
+                  <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                    <span id="user-initials">U</span>
+                  </div>
+                </button>
+              </div>
+              <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                <div id="user-email" class="block px-4 py-2 text-sm text-gray-700 border-b"></div>
+                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
+              </div>
+            </div>
+            <div class="ml-3 sm:hidden">
+              <button id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                <i class="fas fa-bars"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile menu, show/hide based on menu state -->
+      <div id="mobile-menu" class="sm:hidden hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+          <button onclick="showView('home')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Home</button>
+          <button onclick="showView('create')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Create Project</button>
+          <button onclick="showView('myProjects')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">My Projects</button>
+          <button onclick="showView('chat')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 w-full text-left">Chat</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Notifications Panel -->
+    <div id="notifications-panel" class="hidden fixed inset-0 overflow-hidden z-20" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+          <div class="relative w-screen max-w-md">
+            <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
+              <div class="p-6">
+                <div class="flex items-start justify-between">
+                  <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Notifications</h2>
+                  <div class="ml-3 h-7 flex items-center">
+                    <button id="close-notifications" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none">
+                      <span class="sr-only">Close panel</span>
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-1 px-4 sm:px-6">
+                <div id="notif-list" class="divide-y divide-gray-200">
+                  <!-- Notifications will be inserted here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Views -->
+    <div class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      
+      <!-- Home View -->
+      <div id="home" class="view">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Featured Projects</h1>
+          <p class="text-gray-600">Find exciting projects to collaborate on</p>
+        </div>
+        <div id="project-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Projects will be inserted here -->
+        </div>
+      </div>
+      
+      <!-- Create Project View -->
+      <div id="create" class="view hidden">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Create a Project</h1>
+          <p class="text-gray-600">Share your idea and find talented collaborators</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+          <div class="space-y-6">
+            <div>
+              <label for="project-title" class="block text-sm font-medium text-gray-700">Project Title</label>
+              <input id="project-title" type="text" placeholder="E.g., Mobile App for Sustainable Shopping" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+              <label for="project-desc" class="block text-sm font-medium text-gray-700">Project Description</label>
+              <textarea id="project-desc" rows="4" placeholder="Describe your project, goals, and vision..." class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+            </div>
+            <div>
+              <label for="project-roles" class="block text-sm font-medium text-gray-700">Roles Needed</label>
+              <input id="project-roles" type="text" placeholder="E.g., Designer, Frontend, Backend" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+              <p class="mt-2 text-sm text-gray-500">Separate roles with commas</p>
+            </div>
+            <div>
+              <button onclick="createProject()" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-md text-white btn-gradient shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Create Project
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- My Projects View -->
+      <div id="myProjects" class="view hidden">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">My Projects</h1>
+          <p class="text-gray-600">Manage your created projects and applications</p>
+        </div>
+        <div id="my-projects-list" class="space-y-6">
+          <!-- My projects will be inserted here -->
+        </div>
+      </div>
+      
+      <!-- Chat View -->
+      <div id="chat" class="view hidden">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Messages</h1>
+          <p class="text-gray-600">Communicate with your collaborators</p>
+        </div>
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+          <div id="chat-box" class="h-96 overflow-y-auto p-4 space-y-3">
+            <div class="flex justify-center">
+              <p class="text-gray-500 text-sm">No messages yet</p>
+            </div>
+          </div>
+          <div class="border-t p-4 flex">
+            <input id="chat-input" type="text" placeholder="Type a message..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <button onclick="sendMessage()" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     
-    <h2>Create a Project</h2>
-<input id="project-title" placeholder="Project Title"><br>
-<textarea id="project-desc" placeholder="Project Description"></textarea><br>
-<input id="project-roles" placeholder="Roles (comma-separated: e.g. Designer,Frontend)"><br>
-<button onclick="createProject()">Create Project</button>
-
-<hr>
-
-<h2>All Projects</h2>
-<div id="project-list"></div>
-
-<hr>
-  
-<h2>Your Notifications</h2>
-<div id="notif-list"></div>
-
-
-</div>
-
-
-  <nav>
-    <button onclick="showView('home')">Home</button>
-    <button onclick="showView('create')">Create Project</button>
-    <button onclick="showView('myProjects')">My Projects</button>
-    <button onclick="showView('chat')">Chat</button>
-  </nav>
-
-  <div id="home" class="view">
-    <h1>Featured Projects</h1>
-    <div id="project-list"></div>
-  </div>
-
-  <div id="create" class="view" style="display: none;">
-    <h1>Create a Project</h1>
-    <form id="create-form">
-      <input type="text" id="project-name" placeholder="Project Name" required><br>
-      <textarea id="project-desc" placeholder="Description" required></textarea><br>
-      <input type="text" id="project-roles" placeholder="Roles (comma separated)" required><br>
-      <button type="submit">Create</button>
-    </form>
-  </div>
-
-  <div id="myProjects" class="view" style="display: none;">
-    <h1>My Projects</h1>
-    <div id="my-projects-list"></div>
-  </div>
-
-  <div id="chat" class="view" style="display: none;">
-    <h1>Chat</h1>
-    <div id="chat-box">No messages yet</div>
-    <input id="chat-input" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
-  </div>
-
-  <script src="js/main.js"></script>
-  <script src="js/project.js"></script>
-  <script src="js/apply.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/auth.js"></script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged,
-    GoogleAuthProvider,
-    signInWithPopup
-  } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    onSnapshot,
-    query,
-    doc,
-    updateDoc
-  } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
-    authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
-    projectId: "solvearn-mvp-a00f1",
-    storageBucket: "solvearn-mvp-a00f1.firebasestorage.app",
-    messagingSenderId: "71657733409",
-    appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
-    measurementId: "G-NJGT0SJ2TP"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // Signup with email/password
-  window.signup = async function () {
-    const email = document.getElementById("signup-email").value;
-    const password = document.getElementById("signup-password").value;
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert("Signup successful!");
-    } catch (error) {
-      alert("Signup error: " + error.message);
-    }
-  };
-
-  // Login with email/password
-  window.login = async function () {
-    const email = document.getElementById("login-email").value;
-    const password = document.getElementById("login-password").value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful!");
-    } catch (error) {
-      alert("Login error: " + error.message);
-    }
-  };
-
-  // Login with Google
-  window.googleLogin = async function () {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      alert("Google login successful!");
-    } catch (error) {
-      alert("Google login error: " + error.message);
-    }
-  };
-
-  // Logout
-  window.logout = function () {
-    signOut(auth);
-  };
-
-  // Show/hide views based on auth state
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Logged in:", user.email);
-      document.getElementById("auth-section").style.display = "none";
-      document.getElementById("main-app").style.display = "block";
-    } else {
-      document.getElementById("auth-section").style.display = "block";
-      document.getElementById("main-app").style.display = "none";
-    }
-  });
-
-  // Notifications
-  const notifListDiv = document.getElementById("notif-list");
-  onSnapshot(query(collection(db, "notifications")), (snapshot) => {
-    notifListDiv.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      const notif = docSnap.data();
-      if (notif.to === auth.currentUser?.uid) {
-        const notifDiv = document.createElement("div");
-        notifDiv.innerHTML = `
-          <p>${notif.message}</p>
-          <small>${new Date(notif.timestamp).toLocaleString()}</small>
-          <hr>
-        `;
-        notifListDiv.appendChild(notifDiv);
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      onSnapshot,
+      query,
+      doc,
+      updateDoc,
+      arrayRemove,
+      where
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
+      authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
+      projectId: "solvearn-mvp-a00f1",
+      storageBucket: "solvearn-mvp-a00f1.firebasestorage.app",
+      messagingSenderId: "71657733409",
+      appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
+      measurementId: "G-NJGT0SJ2TP"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    // UI elements and interactions
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const notificationsBtn = document.getElementById('notifications-btn');
+    const notificationsPanel = document.getElementById('notifications-panel');
+    const closeNotifications = document.getElementById('close-notifications');
+    
+    userMenuBtn.addEventListener('click', () => {
+      userDropdown.classList.toggle('hidden');
+    });
+    
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    notificationsBtn.addEventListener('click', () => {
+      notificationsPanel.classList.remove('hidden');
+    });
+    
+    closeNotifications.addEventListener('click', () => {
+      notificationsPanel.classList.add('hidden');
+    });
+    
+    // Hide dropdowns when clicking outside
+    document.addEventListener('click', (event) => {
+      if (!userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+        userDropdown.classList.add('hidden');
+      }
+      
+      if (!notificationsBtn.contains(event.target) && !notificationsPanel.contains(event.target) || closeNotifications.contains(event.target)) {
+        notificationsPanel.classList.add('hidden');
       }
     });
-  });
-
-  // Create project
-  window.createProject = async function () {
-    const title = document.getElementById("project-title").value;
-    const desc = document.getElementById("project-desc").value;
-    const roles = document.getElementById("project-roles").value.split(",").map(r => r.trim());
-
-    try {
-      await addDoc(collection(db, "projects"), {
-        title,
-        desc,
-        roles,
-        createdBy: auth.currentUser.uid,
-        createdByEmail: auth.currentUser.email,
-        applicants: []
+    
+    // View management
+    window.showView = function(viewName) {
+      document.querySelectorAll('.view').forEach(view => {
+        view.classList.add('hidden');
       });
-      alert("Project created!");
-    } catch (err) {
-      alert("Error creating project: " + err.message);
-    }
-  };
-
-  // Show all projects
-  const projectListDiv = document.getElementById("project-list");
-  onSnapshot(collection(db, "projects"), (snapshot) => {
-    projectListDiv.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const projectDiv = document.createElement("div");
-      projectDiv.innerHTML = `
-        <h3>${data.title}</h3>
-        <p>${data.desc}</p>
-        <p><strong>Roles:</strong> ${data.roles.join(", ")}</p>
-        <p><strong>By:</strong> ${data.createdByEmail}</p>
-        <button onclick="applyProject('${docSnap.id}')">Apply</button>
-        ${data.createdBy === auth.currentUser?.uid
-          ? `<button onclick="removeRole('${docSnap.id}')">Edit Roles</button>`
-          : ''}
-        <hr>
-      `;
-      projectListDiv.appendChild(projectDiv);
-    });
-  });
-
-  // Apply to project
-  window.applyProject = async function (id) {
-    const user = auth.currentUser;
-    const projRef = doc(db, "projects", id);
-    const snapshot = await getDocs(query(collection(db, "projects")));
-
-    snapshot.forEach(async (docSnap) => {
-      if (docSnap.id === id) {
-        const data = docSnap.data();
-        if (data.applicants.includes(user.uid)) {
-          alert("Already applied!");
-        } else {
-          await updateDoc(projRef, {
-            applicants: [...data.applicants, user.uid]
-          });
-
-          await addDoc(collection(db, "notifications"), {
-            to: data.createdBy,
-            message: `${user.email} applied to your project "${data.title}"`,
-            timestamp: Date.now(),
-            read: false
-          });
-
-          alert("Applied!");
+      document.getElementById(viewName).classList.remove('hidden');
+      
+      // Close mobile menu after navigation
+      mobileMenu.classList.add('hidden');
+    };
+    
+    // Auth functions
+    window.signup = async function() {
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+      
+      if (!email || !password) {
+        showAlert("Please fill in all fields", "error");
+        return;
+      }
+      
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        showAlert("Account created successfully!", "success");
+      } catch (error) {
+        showAlert("Signup error: " + error.message, "error");
+      }
+    };
+    
+    window.login = async function() {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      
+      if (!email || !password) {
+        showAlert("Please fill in all fields", "error");
+        return;
+      }
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showAlert("Login successful", "success");
+      } catch (error) {
+        showAlert("Login error: " + error.message, "error");
+      }
+    };
+    
+    window.googleLogin = async function() {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        showAlert("Google login successful", "success");
+      } catch (error) {
+        showAlert("Google login error: " + error.message, "error");
+      }
+    };
+    
+    window.logout = function() {
+      signOut(auth);
+      showAlert("Logged out successfully", "info");
+    };
+    
+    // Project functions
+    window.createProject = async function() {
+      const title = document.getElementById("project-title").value;
+      const desc = document.getElementById("project-desc").value;
+      const rolesInput = document.getElementById("project-roles").value;
+      
+      if (!title || !desc || !rolesInput) {
+        showAlert("Please fill in all fields", "error");
+        return;
+      }
+      
+      const roles = rolesInput.split(",").map(r => r.trim());
+      
+      try {
+        await addDoc(collection(db, "projects"), {
+          title,
+          desc,
+          roles,
+          createdBy: auth.currentUser.uid,
+          createdByEmail: auth.currentUser.email,
+          applicants: [],
+          createdAt: Date.now()
+        });
+        
+        showAlert("Project created successfully!", "success");
+        document.getElementById("project-title").value = "";
+        document.getElementById("project-desc").value = "";
+        document.getElementById("project-roles").value = "";
+        
+        // Navigate to home view to see the new project
+        showView('home');
+      } catch (error) {
+        showAlert("Error creating project: " + error.message, "error");
+      }
+    };
+    
+    // Apply to project
+    window.applyProject = async function(id) {
+      const user = auth.currentUser;
+      const projRef = doc(db, "projects", id);
+      
+      try {
+        const snapshot = await getDocs(query(collection(db, "projects")));
+        let projectData;
+        
+        snapshot.forEach((docSnap) => {
+          if (docSnap.id === id) {
+            projectData = docSnap.data();
+          }
+        });
+        
+        if (!projectData) {
+          showAlert("Project not found", "error");
+          return;
         }
+        
+        if (projectData.applicants.includes(user.uid)) {
+          showAlert("You've already applied to this project", "info");
+          return;
+        }
+        
+        await updateDoc(projRef, {
+          applicants: [...projectData.applicants, user.uid]
+        });
+        
+        // Add notification to project creator
+        await addDoc(collection(db, "notifications"), {
+          to: projectData.createdBy,
+          from: user.uid,
+          fromEmail: user.email,
+          message: `${user.email} applied to your project "${projectData.title}"`,
+          timestamp: Date.now(),
+          read: false,
+          projectId: id
+        });
+        
+        showAlert("Application submitted successfully!", "success");
+      } catch (error) {
+        showAlert("Error applying to project: " + error.message, "error");
+      }
+    };
+    
+    // Edit roles
+    window.editRoles = async function(id) {
+      try {
+        const snapshot = await getDocs(query(collection(db, "projects")));
+        let projectData;
+        
+        snapshot.forEach((docSnap) => {
+          if (docSnap.id === id) {
+            projectData = docSnap.data();
+          }
+        });
+        
+        if (!projectData) {
+          showAlert("Project not found", "error");
+          return;
+        }
+        
+        const currentRoles = projectData.roles.join(", ");
+        const newRoles = prompt("Edit roles (comma-separated):", currentRoles);
+        
+        if (!newRoles) return;
+        
+        await updateDoc(doc(db, "projects", id), {
+          roles: newRoles.split(",").map(r => r.trim())
+        });
+        
+        showAlert("Roles updated successfully!", "success");
+      } catch (error) {
+        showAlert("Error updating roles: " + error.message, "error");
+      }
+    };
+    
+    // Chat function
+    window.sendMessage = function() {
+      const messageInput = document.getElementById("chat-input");
+      const message = messageInput.value.trim();
+      
+      if (!message) return;
+      
+      const chatBox = document.getElementById("chat-box");
+      const messageElement = document.createElement("div");
+      messageElement.className = "bg-indigo-50 p-3 rounded-lg max-w-xs ml-auto";
+      messageElement.innerHTML = `
+        <p class="text-gray-800">${message}</p>
+        <p class="text-xs text-gray-500 text-right mt-1">Just now</p>
+      `;
+      
+      // Clear previous "no messages" if it exists
+      if (chatBox.innerText.includes("No messages yet")) {
+        chatBox.innerHTML = "";
+      }
+      
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      messageInput.value = "";
+      
+      // Simulate a response after 1 second
+      setTimeout(() => {
+        const responseElement = document.createElement("div");
+        responseElement.className = "bg-gray-200 p-3 rounded-lg max-w-xs";
+        responseElement.innerHTML = `
+          <p class="text-gray-800">Thanks for your message! This is a demo response.</p>
+          <p class="text-xs text-gray-500 mt-1">Just now</p>
+        `;
+        chatBox.appendChild(responseElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 1000);
+    };
+    
+    // Alert function
+    function showAlert(message, type) {
+      const alertElement = document.createElement("div");
+      
+      let bgColor, icon;
+      switch(type) {
+        case "success":
+          bgColor = "bg-green-100 border-green-400 text-green-700";
+          icon = '<i class="fas fa-check-circle mr-2"></i>';
+          break;
+        case "error":
+          bgColor = "bg-red-100 border-red-400 text-red-700";
+          icon = '<i class="fas fa-exclamation-circle mr-2"></i>';
+          break;
+        case "info":
+          bgColor = "bg-blue-100 border-blue-400 text-blue-700";
+          icon = '<i class="fas fa-info-circle mr-2"></i>';
+          break;
+        default:
+          bgColor = "bg-gray-100 border-gray-400 text-gray-700";
+          icon = '<i class="fas fa-bell mr-2"></i>';
+      }
+      
+      alertElement.className = `fixed top-4 right-4 px-4 py-3 rounded border ${bgColor} flex items-center shadow-lg z-50`;
+      alertElement.innerHTML = `
+        ${icon}
+        <span>${message}</span>
+        <button class="ml-4 text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      document.body.appendChild(alertElement);
+      
+      // Remove alert after clicking close button
+      alertElement.querySelector("button").addEventListener("click", () => {
+        alertElement.remove();
+      });
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (document.body.contains(alertElement)) {
+          alertElement.remove();
+        }
+      }, 5000);
+    }
+    
+    // Listen for auth state changes
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        document.getElementById("auth-section").style.display = "none";
+        document.getElementById("main-app").style.display = "flex";
+        
+        // Update UI with user info
+        document.getElementById("user-email").textContent = user.email;
+        
+        // Set user initials in avatar
+        const initials = user.email ? user.email.substring(0, 1).toUpperCase() : "U";
+        document.getElementById("user-initials").textContent = initials;
+        
+        // Load projects
+        loadProjects();
+        
+        // Load notifications
+        loadNotifications();
+      } else {
+        // User is signed out
+        document.getElementById("auth-section").style.display = "flex";
+        document.getElementById("main-app").style.display = "none";
       }
     });
-  };
-
-  // Edit roles
-  window.removeRole = async function (id) {
-    const newRoles = prompt("Enter new roles (comma-separated)");
-    if (!newRoles) return;
-    await updateDoc(doc(db, "projects", id), {
-      roles: newRoles.split(",").map(r => r.trim())
-    });
-    alert("Roles updated!");
-  };
-</script>
-
-
-
+    
+    // Load projects
+    function loadProjects() {
+      const projectListDiv = document.getElementById("project-list");
+      const myProjectsListDiv = document.getElementById("my-projects-list");
+      
+      onSnapshot(collection(db, "projects"), (snapshot) => {
+        // Clear project lists
+        projectListDiv.innerHTML = "";
+        myProjectsListDiv.innerHTML = "";
+        
+        // Counter for my projects
+        let myProjectCount = 0;
+        
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const id = docSnap.id;
+          
+          // Format date
+          const date = new Date(data.createdAt || Date.now());
+          const formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          // Create project card for all projects
+          const projectCard = document.createElement("div");
+          projectCard.className = "bg-white shadow rounded-lg overflow-hidden card";
+          
+          // Generate role badges HTML
+          const rolesBadges = data.roles.map(role => 
+            `<span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2 mb-2">${role}</span>`
+          ).join('');
+          
+          projectCard.innerHTML = `
+            <div class="p-5">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">${data.title}</h3>
+              <p class="text-gray-600 text-sm mb-4">${data.desc}</p>
+              <div class="mb-4">
+                ${rolesBadges}
+              </div>
+              <div class="flex items-center text-sm text-gray-500 mb-4">
+                <i class="fas fa-user mr-1"></i>
+                <span>${data.createdByEmail}</span>
+                <span class="mx-2">•</span>
+                <i class="far fa-calendar mr-1"></i>
+                <span>${formattedDate}</span>
+              </div>
+              ${data.createdBy === auth.currentUser?.uid
+                ? `<button onclick="editRoles('${id}')" class="mr-2 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    <i class="fas fa-edit mr-1"></i> Edit Roles
+                  </button>`
+                : `<button onclick="applyProject('${id}')" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-paper-plane mr-1"></i> Apply
+                  </button>`
+              }
+            </div>
+          `;
+          
+          // Add to project list
+          projectListDiv.appendChild(projectCard);
+          
+          // Create card for my projects section if user is creator
+          if (data.createdBy === auth.currentUser?.uid) {
+            myProjectCount++;
+            
+            const myProjectCard = document.createElement("div");
+            myProjectCard.className = "bg-white shadow rounded-lg overflow-hidden";
+            
+            // Count applicants
+            const applicantCount = data.applicants ? data.applicants.length : 0;
+            
+            myProjectCard.innerHTML = `
+              <div class="p-5">
+                <div class="flex justify-between items-start">
+                  <h3 class="text-xl font-semibold text-gray-900">${data.title}</h3>
+                  <span class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">
+                    ${applicantCount} applicant${applicantCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <p class="mt-2 text-gray-600">${data.desc}</p>
+                <div class="mt-4">
+                  <p class="text-sm font-medium text-gray-700">Roles Needed:</p>
+                  <div class="mt-2 flex flex-wrap">
+                    ${rolesBadges}
+                  </div>
+                </div>
+                <div class="mt-5 flex justify-between items-center">
+                  <button onclick="editRoles('${id}')" class="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-edit mr-1"></i> Edit Roles
+                  </button>
+                  <span class="text-sm text-gray-500">Created: ${formattedDate}</span>
+                </div>
+              </div>
+            `;
+            
+            myProjectsListDiv.appendChild(myProjectCard);
+          }
+        });
+        
+        // Show message if no projects in "My Projects"
+        if (myProjectCount === 0) {
+          myProjectsListDiv.innerHTML = `
+            <div class="bg-white shadow rounded-lg p-6 text-center">
+              <i class="fas fa-project-diagram text-4xl text-gray-300 mb-3"></i>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
+              <p class="text-gray-600 mb-4">You haven't created any projects yet.</p>
+              <button onclick="showView('create')" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Create Your First Project
+              </button>
+            </div>
+          `;
+        }
+        
+        // Show message if no projects at all
+        if (snapshot.empty) {
+          projectListDiv.innerHTML = `
+            <div class="col-span-full bg-white shadow rounded-lg p-6 text-center">
+              <i class="fas fa-search text-4xl text-gray-300 mb-3"></i>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No projects available</h3>
+              <p class="text-gray-600 mb-4">Be the first to create a project!</p>
+              <button onclick="showView('create')" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Create Project
+              </button>
+            </div>
+          `;
+        }
+      });
+    }
+    
+    // Load notifications
+    function loadNotifications() {
+      const notifListDiv = document.getElementById("notif-list");
+      const notifBadge = document.getElementById("notif-badge");
+      
+      onSnapshot(query(collection(db, "notifications")), (snapshot) => {
+        notifListDiv.innerHTML = "";
+        let unreadCount = 0;
+        
+        // Exit if no user is logged in
+        if (!auth.currentUser) return;
+        
+        snapshot.forEach(docSnap => {
+          const notif = docSnap.data();
+          
+          // Only show notifications for current user
+          if (notif.to === auth.currentUser.uid) {
+            // Count unread notifications
+            if (!notif.read) {
+              unreadCount++;
+            }
+            
+            // Create notification element
+            const notifElement = document.createElement("div");
+            notifElement.className = `p-4 ${notif.read ? 'bg-white' : 'bg-indigo-50'}`;
+            
+            // Format time
+            const date = new Date(notif.timestamp);
+            const formattedTime = date.toLocaleString('en-US', { 
+              month: 'short', 
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit'
+            });
+            
+            notifElement.innerHTML = `
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                    <i class="fas fa-bell"></i>
+                  </div>
+                </div>
+                <div class="ml-3 flex-1">
+                  <p class="text-sm font-medium text-gray-900">${notif.message}</p>
+                  <p class="mt-1 text-sm text-gray-500">${formattedTime}</p>
+                </div>
+              </div>
+            `;
+            
+            notifListDiv.appendChild(notifElement);
+          }
+        });
+        
+        // Update badge count
+        if (unreadCount > 0) {
+          notifBadge.textContent = unreadCount;
+          notifBadge.classList.remove('hidden');
+        } else {
+          notifBadge.classList.add('hidden');
+        }
+        
+        // Display message if no notifications
+        if (notifListDiv.innerHTML === '') {
+          notifListDiv.innerHTML = `
+            <div class="py-8 px-4 text-center">
+              <i class="fas fa-bell-slash text-3xl text-gray-300 mb-3"></i>
+              <p class="text-gray-500">No notifications yet</p>
+            </div>
+          `;
+        }
+      });
+    }
+  </script>
 </body>
 </html>
