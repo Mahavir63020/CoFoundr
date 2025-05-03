@@ -87,115 +87,190 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
   import {
-    getFirestore, collection, addDoc, onSnapshot,
-    query, updateDoc, doc
-  } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-  import {
-    getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup
   } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    onSnapshot,
+    query,
+    doc,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC_wK8NlJw-yUvsqKkBFxBP1GdzqEbzWP8",
     authDomain: "solvearn-mvp-a00f1.firebaseapp.com",
     projectId: "solvearn-mvp-a00f1",
-    storageBucket: "solvearn-mvp-a00f1.appspot.com",
+    storageBucket: "solvearn-mvp-a00f1.firebasestorage.app",
     messagingSenderId: "71657733409",
     appId: "1:71657733409:web:1db68c51393ecd7dfc5260",
     measurementId: "G-NJGT0SJ2TP"
   };
 
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore();
-  const auth = getAuth();
-  const provider = new GoogleAuthProvider();
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  // 🔒 Google Sign-in
-  document.getElementById("loginBtn").addEventListener("click", async () => {
+  // Signup with email/password
+  window.signup = async function () {
+    const email = document.getElementById("signup-email").value;
+    const password = document.getElementById("signup-password").value;
     try {
-      await signInWithPopup(auth, provider);
-      alert("Signed in!");
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("Signup successful!");
     } catch (error) {
-      console.error(error.message);
+      alert("Signup error: " + error.message);
     }
-  });
-
-  const notifListDiv = document.getElementById("notif-list");
-
-  // 🔔 Real-time Notification Listener
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      const notifQuery = query(collection(db, "notifications"));
-      onSnapshot(notifQuery, (snapshot) => {
-        notifListDiv.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const notif = docSnap.data();
-          const id = docSnap.id;
-
-          if (notif.to === user.uid && notif.type === "application") {
-            if (notif.status === "pending") {
-              const notifDiv = document.createElement("div");
-              notifDiv.innerHTML = `
-                <p>${notif.message}</p>
-                <button onclick="respondToApplication('${id}', '${notif.from}', 'accepted')">Accept</button>
-                <button onclick="respondToApplication('${id}', '${notif.from}', 'rejected')">Reject</button>
-                <hr>
-              `;
-              notifListDiv.appendChild(notifDiv);
-            } else {
-              const notifDiv = document.createElement("div");
-              notifDiv.innerHTML = `
-                <p><strong>Response sent to ${notif.fromEmail}</strong>: ${notif.status}</p>
-                <small>${new Date(notif.timestamp.seconds * 1000).toLocaleString()}</small>
-                <hr>
-              `;
-              notifListDiv.appendChild(notifDiv);
-            }
-          }
-
-          if (notif.from === user.uid && notif.status !== "pending") {
-            const notifDiv = document.createElement("div");
-            notifDiv.innerHTML = `
-              <p><strong>Application to "${notif.projectTitle}" was ${notif.status}</strong></p>
-              <small>${new Date(notif.timestamp.seconds * 1000).toLocaleString()}</small>
-              <hr>
-            `;
-            notifListDiv.appendChild(notifDiv);
-          }
-        });
-      });
-    }
-  });
-
-  // 🟢 Handle Accept / Reject
-  window.respondToApplication = async function (notifId, applicantId, result) {
-    const notifRef = doc(db, "notifications", notifId);
-    await updateDoc(notifRef, {
-      status: result
-    });
-    alert(`User has been ${result}`);
   };
 
-  // 📤 Call this when applying to project
-  window.applyToProject = async function (projectId, projectTitle, creatorUid) {
-    const user = auth.currentUser;
-    if (!user) return alert("Please sign in first");
+  // Login with email/password
+  window.login = async function () {
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login successful!");
+    } catch (error) {
+      alert("Login error: " + error.message);
+    }
+  };
 
-    await addDoc(collection(db, "notifications"), {
-      to: creatorUid,
-      from: user.uid,
-      fromEmail: user.email,
-      message: `${user.email} applied to your project "${projectTitle}"`,
-      projectId,
-      projectTitle,
-      status: "pending",
-      timestamp: new Date(),
-      type: "application"
+  // Login with Google
+  window.googleLogin = async function () {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      alert("Google login successful!");
+    } catch (error) {
+      alert("Google login error: " + error.message);
+    }
+  };
+
+  // Logout
+  window.logout = function () {
+    signOut(auth);
+  };
+
+  // Show/hide views based on auth state
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Logged in:", user.email);
+      document.getElementById("auth-section").style.display = "none";
+      document.getElementById("main-app").style.display = "block";
+    } else {
+      document.getElementById("auth-section").style.display = "block";
+      document.getElementById("main-app").style.display = "none";
+    }
+  });
+
+  // Notifications
+  const notifListDiv = document.getElementById("notif-list");
+  onSnapshot(query(collection(db, "notifications")), (snapshot) => {
+    notifListDiv.innerHTML = "";
+    snapshot.forEach(docSnap => {
+      const notif = docSnap.data();
+      if (notif.to === auth.currentUser?.uid) {
+        const notifDiv = document.createElement("div");
+        notifDiv.innerHTML = `
+          <p>${notif.message}</p>
+          <small>${new Date(notif.timestamp).toLocaleString()}</small>
+          <hr>
+        `;
+        notifListDiv.appendChild(notifDiv);
+      }
     });
+  });
 
-    alert("Applied successfully");
+  // Create project
+  window.createProject = async function () {
+    const title = document.getElementById("project-title").value;
+    const desc = document.getElementById("project-desc").value;
+    const roles = document.getElementById("project-roles").value.split(",").map(r => r.trim());
+
+    try {
+      await addDoc(collection(db, "projects"), {
+        title,
+        desc,
+        roles,
+        createdBy: auth.currentUser.uid,
+        createdByEmail: auth.currentUser.email,
+        applicants: []
+      });
+      alert("Project created!");
+    } catch (err) {
+      alert("Error creating project: " + err.message);
+    }
+  };
+
+  // Show all projects
+  const projectListDiv = document.getElementById("project-list");
+  onSnapshot(collection(db, "projects"), (snapshot) => {
+    projectListDiv.innerHTML = "";
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const projectDiv = document.createElement("div");
+      projectDiv.innerHTML = `
+        <h3>${data.title}</h3>
+        <p>${data.desc}</p>
+        <p><strong>Roles:</strong> ${data.roles.join(", ")}</p>
+        <p><strong>By:</strong> ${data.createdByEmail}</p>
+        <button onclick="applyProject('${docSnap.id}')">Apply</button>
+        ${data.createdBy === auth.currentUser?.uid
+          ? `<button onclick="removeRole('${docSnap.id}')">Edit Roles</button>`
+          : ''}
+        <hr>
+      `;
+      projectListDiv.appendChild(projectDiv);
+    });
+  });
+
+  // Apply to project
+  window.applyProject = async function (id) {
+    const user = auth.currentUser;
+    const projRef = doc(db, "projects", id);
+    const snapshot = await getDocs(query(collection(db, "projects")));
+
+    snapshot.forEach(async (docSnap) => {
+      if (docSnap.id === id) {
+        const data = docSnap.data();
+        if (data.applicants.includes(user.uid)) {
+          alert("Already applied!");
+        } else {
+          await updateDoc(projRef, {
+            applicants: [...data.applicants, user.uid]
+          });
+
+          await addDoc(collection(db, "notifications"), {
+            to: data.createdBy,
+            message: `${user.email} applied to your project "${data.title}"`,
+            timestamp: Date.now(),
+            read: false
+          });
+
+          alert("Applied!");
+        }
+      }
+    });
+  };
+
+  // Edit roles
+  window.removeRole = async function (id) {
+    const newRoles = prompt("Enter new roles (comma-separated)");
+    if (!newRoles) return;
+    await updateDoc(doc(db, "projects", id), {
+      roles: newRoles.split(",").map(r => r.trim())
+    });
+    alert("Roles updated!");
   };
 </script>
 
