@@ -1,0 +1,17 @@
+{
+  "name": "foundrylink",
+  "version": "1.0.0",
+  "description": "A platform connecting founders with skilled individuals",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "firebase": "^10.8.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.0"
+  }
+} 

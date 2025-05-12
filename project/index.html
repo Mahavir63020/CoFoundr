@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoundryLink - Connect Founders with Talent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import firebaseConfig from './scripts/firebase-config.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        window.auth = getAuth(app);
+        window.db = getFirestore(app);
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">FoundryLink</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" data-page="home">Home</a>
+            <a href="#" class="nav-link" data-page="applications">My Applications</a>
+            <div class="notifications-container">
+                <button id="notification-btn" class="notifications-btn">
+                    <span class="notification-bell">🔔</span>
+                    <span id="notification-badge" class="notification-badge"></span>
+                </button>
+                <div id="notification-dropdown" class="notifications-dropdown">
+                    <!-- Notifications will be populated here -->
+                </div>
+            </div>
+            <button id="login-btn" class="btn btn-primary">Sign in with Google</button>
+            <button id="logout-btn" class="btn btn-secondary hidden">Sign Out</button>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <main id="home-page" class="page active">
+        <div class="container">
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="Search projects..." class="search-input">
+                <select id="stage-filter" class="filter-select">
+                    <option value="">All Stages</option>
+                    <option value="idea">Idea</option>
+                    <option value="mvp">MVP</option>
+                    <option value="launched">Launched</option>
+                </select>
+                <select id="role-filter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option value="frontend">Frontend</option>
+                    <option value="backend">Backend</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="design">Design</option>
+                </select>
+            </div>
+
+            <div id="projects-grid" class="projects-grid">
+                <!-- Projects will be populated here -->
+            </div>
+
+            <button id="create-project-btn" class="floating-btn hidden">
+                <span>+</span> Create Project
+            </button>
+        </div>
+    </main>
+
+    <!-- Create Project Page -->
+    <main id="create-page" class="page">
+        <div class="container">
+            <div class="form-container">
+                <h2>Create New Project</h2>
+                <div class="step-indicator">
+                    <div class="step active" data-step="1">Project Basics</div>
+                    <div class="step" data-step="2">Problem & Solution</div>
+                    <div class="step" data-step="3">Project Details</div>
+                    <div class="step" data-step="4">Roles & Questions</div>
+                </div>
+
+                <form id="create-project-form">
+                    <!-- Step 1: Project Basics -->
+                    <div class="form-step active" data-step="1">
+                        <div class="form-group">
+                            <label for="project-title">Project Title</label>
+                            <input type="text" id="project-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-stage">Project Stage</label>
+                            <select id="project-stage" required>
+                                <option value="idea">Idea</option>
+                                <option value="mvp">MVP</option>
+                                <option value="launched">Launched</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Problem & Solution -->
+                    <div class="form-step" data-step="2">
+                        <div class="form-group">
+                            <label for="problem">Problem Statement</label>
+                            <textarea id="problem" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="solution">Solution</label>
+                            <textarea id="solution" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Project Details -->
+                    <div class="form-step" data-step="3">
+                        <div class="form-group">
+                            <label for="project-summary">Project Summary</label>
+                            <textarea id="project-summary" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-url">Project URL (optional)</label>
+                            <input type="url" id="project-url">
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Roles & Questions -->
+                    <div class="form-step" data-step="4">
+                        <div class="form-group">
+                            <label>Required Roles</label>
+                            <div id="roles-container">
+                                <div class="role-input">
+                                    <input type="text" placeholder="Role title" required>
+                                    <button type="button" class="remove-btn">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-role-btn" class="btn btn-secondary">Add Role</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Application Questions</label>
+                            <div id="questions-container">
+                                <div class="question-input">
+                                    <textarea placeholder="Question" required></textarea>
+                                    <button type="button" class="remove-btn">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-question-btn" class="btn btn-secondary">Add Question</button>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" id="prev-step" class="btn btn-secondary hidden">Previous</button>
+                        <button type="button" id="next-step" class="btn btn-primary">Next</button>
+                        <button type="submit" id="submit-project" class="btn btn-primary hidden">Create Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Project Details Page -->
+    <main id="project-page" class="page">
+        <div class="container">
+            <div id="project-details" class="project-details">
+                <!-- Project details will be populated here -->
+            </div>
+            <div id="application-form" class="application-form hidden">
+                <!-- Application form will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Applications Page -->
+    <main id="applications-page" class="page">
+        <div class="container">
+            <div class="applications-container">
+                <h2>My Applications</h2>
+                <div id="applications-list" class="applications-list">
+                    <!-- Applications will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Welcome to FoundryLink</h2>
+            <p>Sign in to create projects and apply for roles.</p>
+            <button id="modal-login-btn" class="btn btn-primary">Sign in with Google</button>
+        </div>
+    </div>
+
+    <script type="module" src="scripts/auth.js"></script>
+    <script type="module" src="scripts/firestore.js"></script>
+    <script type="module" src="scripts/ui.js"></script>
+    <script type="module" src="scripts/router.js"></script>
+</body>
+</html> 
